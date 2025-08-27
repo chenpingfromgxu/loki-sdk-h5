@@ -1,56 +1,78 @@
-# sdk-h5: Minimal Frontend Error & Log SDK for Loki (Direct Push)
+# sdk-h5: Frontend Error & Log Collection SDK
 
-A lightweight, easy-to-integrate SDK for H5/Web (with Vue adapter and RN stub) that automatically captures common frontend errors and allows simple manual logging, sending them directly to Loki's `/loki/api/v1/push` endpoint.
+<div align="center">
 
+**Lightweight Frontend Error Collection and Log Reporting SDK**
+
+🚀 Ready to Use | 📦 Modular Design | 🔒 Privacy Secure | 🌐 Cross-Platform Support
+
+</div>
+
+A lightweight, easy-to-integrate H5/Web SDK (with Vue adapter and RN basic support) for automatically capturing common frontend errors while providing simple manual logging capabilities, sending data directly to Loki's `/loki/api/v1/push` endpoint.
+
+## ✨ Features
+
+- **🎯 Lightweight**: Core package only ~10KB, load adapters on demand
+- **🔧 Easy Integration**: One line of code to initialize, supports multiple frameworks
+- **🛡️ Reliable Transmission**: Batch reporting + retry mechanism + offline caching
+- **🔒 Privacy Protection**: Data redaction + sampling control + custom filtering
+- **🌐 Cross-Platform**: Supports Web, Vue, React Native
+- **⚡ High Performance**: Async processing + smart debouncing + memory optimization
 - Simple integration: one `init`, optional `installAutoCapture`, minimal config
-- Auto capture: JS errors, unhandled promise rejections, resource load errors; Vue plugin
-- Manual logging: `log()` and `captureError()`
-- Reliable delivery: small queue + batch + retry + sendBeacon on unload
+- Auto capture: JS global errors, unhandled Promise rejections, resource load errors; Vue plugin
+- Manual logging: `log()` and `captureError()`, supports title and log levels
+- Browser detection: automatically identifies browser type (Chrome, Firefox, Safari, Edge, etc.)
+- Reliable transmission: small queue + batch + retry + sendBeacon on page unload
 - Privacy controls: basic redaction hooks
 
+## 🚀 Quick Start
 
-## TL;DR Quickstart
+### Installation
 
-### CDN/UMD (Vanilla JS)
-```html
-<script src="/path/to/sdk-h5.umd.js"></script>
-<script>
-  sdkH5.init({
-    appName: "demo-h5",
-    environment: "staging",
-    endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
-    transport: "loki", // default
-    useSendBeacon: true,
-    enableOfflineBuffer: true,
-  });
-  sdkH5.installAutoCapture();
+```bash
+# Install core package
+npm install @ppyuesheng-org/sdk-h5-core
 
-  // manual logs
-  sdkH5.log("info", "page_loaded", { path: location.pathname });
-</script>
+# Install adapters as needed
+npm install @ppyuesheng-org/sdk-h5-adapter-vue    # Vue applications
+npm install @ppyuesheng-org/sdk-h5-adapter-js     # Plain JS applications
+npm install @ppyuesheng-org/sdk-h5-adapter-rn     # React Native applications
 ```
 
-### NPM (ESM)
-```ts
-import { sdkH5 } from "@sdk-h5/core";
-import { installAutoCapture } from "@sdk-h5/adapter-js";
+### Basic Usage
 
+```typescript
+import { sdkH5, installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
+
+// Initialize SDK
 sdkH5.init({
   appName: "demo-h5",
+  environment: "staging",
   endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
+  useSendBeacon: true,
+  enableOfflineBuffer: true,
 });
+
+// Enable automatic error capture
 installAutoCapture(sdkH5);
+
+// Manual logging
+sdkH5.log("info", "page_loaded", { path: location.pathname }, "Page Loaded");
 ```
 
-### Vue 3
-```ts
+### Vue 3 Integration
+
+```typescript
 import { createApp } from "vue";
 import App from "./App.vue";
-import { sdkH5 } from "@sdk-h5/core";
-import { installAutoCapture } from "@sdk-h5/adapter-js";
-import { createSdkVuePlugin } from "@sdk-h5/adapter-vue";
+import { sdkH5 } from "@ppyuesheng-org/sdk-h5-core";
+import { installAutoCapture } from "@ppyuesheng-org/sdk-h5-core";
+import { createSdkVuePlugin } from "@ppyuesheng-org/sdk-h5-adapter-vue";
 
-sdkH5.init({ appName: "demo-vue", endpoints: { loki: "/loki/api/v1/push" } });
+sdkH5.init({ 
+  appName: "demo-vue", 
+  endpoints: { loki: "/loki/api/v1/push" } 
+});
 installAutoCapture(sdkH5);
 
 const app = createApp(App);
@@ -58,12 +80,189 @@ app.use(createSdkVuePlugin(sdkH5));
 app.mount("#app");
 ```
 
+### React Native
 
-## Requirements
-- Loki exposes `/loki/api/v1/push` with CORS enabled, or is proxied via a gateway that handles CORS and authentication.
-- For production, a reverse proxy (e.g., Nginx/Envoy/API GW) is recommended to manage CORS, auth, and rate limits.
+```typescript
+import { sdkH5 } from '@ppyuesheng-org/sdk-h5-core';
+import { installRnGlobalHandlers } from '@ppyuesheng-org/sdk-h5-adapter-rn';
 
-## CORS Solutions
+sdkH5.init({
+  appName: 'my-rn-app',
+  endpoints: { loki: 'https://your-api.com/loki/api/v1/push' },
+  useProxy: false
+});
+
+installRnGlobalHandlers(sdkH5);
+```
+
+## 🎯 Core Features
+
+### Automatic Error Capture
+
+```typescript
+// Install automatic error capture
+installAutoCapture(sdkH5);
+
+// Automatically captures the following error types:
+// ✅ JavaScript runtime errors
+// ✅ Unhandled Promise rejections  
+// ✅ Resource loading failures
+// ✅ Vue component errors (requires adapter)
+// ✅ React component errors (requires adapter)
+// - JavaScript runtime errors
+// - Unhandled Promise rejections
+// - Resource loading errors (images, scripts, etc.)
+```
+
+### Manual Logging
+
+```typescript
+// Log different levels
+sdkH5.log('info', 'User login', { userId: '123', method: 'password' });
+sdkH5.log('warn', 'API slow response', { endpoint: '/api/users', duration: 5000 });
+sdkH5.log('error', 'Payment failed', { orderId: '456', reason: 'insufficient_funds' });
+
+// Manual error capture
+try {
+  // Some operation that might fail
+} catch (error) {
+  sdkH5.captureError(error, { context: 'payment_process' });
+}
+```
+
+### Context Management
+
+```typescript
+// Set user information
+sdkH5.setUser('user-123');
+
+// Update global context
+sdkH5.setContext({
+  app: { version: '1.2.3' },
+  user: { sessionId: 'session-456' }
+});
+```
+
+## 📦 Package Structure
+
+| Package | Function | Size |
+|---------|----------|------|
+| `@ppyuesheng-org/sdk-h5-core` | Core SDK functionality | ~10KB |
+| `@ppyuesheng-org/sdk-h5-transport-loki` | Loki transport layer | ~3KB |
+| `@ppyuesheng-org/sdk-h5-adapter-js` | Native JS adapter | ~1KB |
+| `@ppyuesheng-org/sdk-h5-adapter-vue` | Vue.js adapter | ~1KB |
+| `@ppyuesheng-org/sdk-h5-adapter-rn` | React Native adapter | ~1KB |
+
+## 🔧 Configuration Options
+
+### Core Configuration
+```typescript
+interface SdkH5Config {
+  appName: string;                    // Required: Application name
+  environment?: 'dev' | 'prod';       // Environment
+  endpoints: {
+    loki: string;                     // Loki push endpoint
+  };
+  useProxy?: boolean;                 // Enable proxy mode
+  proxyPath?: string;                 // Proxy path prefix
+  corsMode?: 'cors' | 'same-origin';  // CORS mode
+  useSendBeacon?: boolean;            // Use sendBeacon for final flush
+  enableOfflineBuffer?: boolean;      // Enable offline buffering
+  sampleRate?: number;                // Sampling rate (0-1)
+  rateLimitPerMin?: number;           // Rate limiting
+  flushIntervalMs?: number;           // Flush interval
+  maxRetries?: number;                // Max retry attempts
+  onError?: (error: Error) => void;   // Error callback
+}
+```
+
+### Advanced Configuration
+```typescript
+sdkH5.init({
+  appName: "my-app",
+  environment: "prod",
+  endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
+  
+  // Reliability settings
+  useSendBeacon: true,
+  enableOfflineBuffer: true,
+  maxRetries: 3,
+  
+  // Performance settings
+  sampleRate: 1.0,
+  rateLimitPerMin: 1000,
+  flushIntervalMs: 5000,
+  
+  // Error handling
+  onError: (err) => console.error('SDK Error:', err)
+});
+```
+
+## API Reference
+
+### Core Methods
+
+#### `sdkH5.init(config)`
+Initialize the SDK with configuration.
+
+#### `sdkH5.log(level, message, attributes?, title?)`
+Send a manual log entry.
+```typescript
+sdkH5.log('info', 'User action', { action: 'click_button', userId: '123' });
+sdkH5.log('error', 'API call failed', { endpoint: '/api/users', status: 500 });
+```
+
+#### `sdkH5.captureError(error, attributes?, title?)`
+Manually capture an error.
+```typescript
+try {
+  // Some risky operation
+} catch (error) {
+  sdkH5.captureError(error, { context: 'user_login' }, 'Login failed');
+}
+```
+
+#### `sdkH5.setUser(userId?)`
+Set the current user ID for all subsequent logs.
+```typescript
+sdkH5.setUser('user-123');
+```
+
+#### `sdkH5.setContext(context)`
+Update the global context for all subsequent logs.
+```typescript
+sdkH5.setContext({
+  app: { version: '1.2.3' },
+  user: { sessionId: 'session-456' }
+});
+```
+
+#### `sdkH5.flush()`
+Manually flush the current queue.
+```typescript
+await sdkH5.flush();
+```
+
+#### `sdkH5.shutdown()`
+Gracefully shutdown the SDK.
+```typescript
+await sdkH5.shutdown();
+```
+
+### Auto-Capture
+
+#### `installAutoCapture(sdk?)`
+Install automatic error capture for:
+- JavaScript errors
+- Unhandled promise rejections
+- Resource load errors
+
+```typescript
+import { installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
+installAutoCapture(sdkH5);
+```
+
+## 🌐 CORS Solutions
 
 If you encounter CORS errors when connecting to Loki, see [CORS-SOLUTIONS.md](./CORS-SOLUTIONS.md) for detailed solutions including:
 
@@ -74,8 +273,8 @@ If you encounter CORS errors when connecting to Loki, see [CORS-SOLUTIONS.md](./
 
 ### Quick Fix - Proxy Mode
 
-```ts
-import { sdkH5, installAutoCapture } from "@sdk-h5/core";
+```typescript
+import { sdkH5, installAutoCapture } from "@ppyuesheng-org/sdk-h5-core";
 
 sdkH5.init({
   appName: "demo-h5",
@@ -90,226 +289,87 @@ installAutoCapture(sdkH5);
 
 Configure your server to proxy `/api/loki/*` to your actual Loki instance.
 
+### Proxy Mode Configuration
+Recommended to use proxy mode to avoid CORS issues, requires server proxy configuration:
 
-## Data Model (JSON line inside Loki values)
-- Envelope per record (serialized as a JSON string in Loki `streams.values[][1]`):
+```nginx
+location /api/loki/ {
+    rewrite ^/api/loki/(.*) /$1 break;
+    proxy_pass http://your-loki-server:3100;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+## Data Model
+
+Each log entry is sent as a JSON envelope to Loki:
+
 ```json
 {
   "timestampNs": "1700000000000000000",
   "level": "error",
   "type": "js_error",
-  "message": "ReferenceError: foo is not defined",
-  "stack": "Error: ...",
-  "attributes": {"origin":"window.onerror"},
+  "message": "TypeError: Cannot read property 'x' of undefined",
+  "attributes": {
+    "error": {
+      "name": "TypeError",
+      "message": "Cannot read property 'x' of undefined",
+      "stack": "TypeError: Cannot read property 'x' of undefined\n    at ..."
+    },
+    "context": "user_login"
+  },
   "context": {
-    "app": {"name":"demo-h5","version":"1.0.0","env":"staging","release":"1.0.0+001"},
-    "user": {"id":"u-123","sessionId":"s-456"},
-    "page": {"url":"https://example.com/x","path":"/x","referrer":""},
-    "device": {"ua":"...","platform":"web","language":"zh-CN","viewport":"1920x1080","dpi":2}
-  }
-}
-```
-
-- Loki stream labels (kept small on client):
-  - `app`, `env`, `platform`, `release`, `sdk` (e.g., `sdk-h5@1.0.0`)
-
-- Example Loki Push payload sent by SDK:
-```json
-{
-  "streams": [
-    {
-      "stream": {"app":"demo-h5","env":"staging","platform":"web","release":"1.0.0","sdk":"sdk-h5@1.0.0"},
-      "values": [["1700000000000000000", "{\"level\":\"error\",\"message\":\"...\"}"]]
-    }
-  ]
-}
-```
-
-
-## Public API (TypeScript)
-```ts
-type LogLevel = "debug" | "info" | "warn" | "error";
-
-type SdkH5Config = {
-  appName: string;
-  appVersion?: string;
-  release?: string;
-  environment?: "dev" | "test" | "staging" | "prod";
-  endpoints: { loki: string };
-  headers?: Record<string, string>;
-  transport?: "loki"; // fixed for now, reserved for future
-  batchMaxBytes?: number;      // default 512*1024
-  batchMaxRecords?: number;    // default 100
-  flushIntervalMs?: number;    // default 2000
-  maxRetries?: number;         // default 3
-  backoffMs?: number;          // default 1000
-  useSendBeacon?: boolean;     // default true
-  enableOfflineBuffer?: boolean; // default true (localStorage)
-  sampleRate?: number;         // default 1
-  rateLimitPerMin?: number;    // default 300
-  redact?: {
-    urlQuery?: boolean;        // default true
-    headers?: string[];        // e.g., ["authorization", "cookie"]
-    custom?: (envelope: LogEnvelope) => LogEnvelope | null;
-  };
-  onError?: (err: Error) => void;
-};
-
-interface SdkH5 {
-  init(config: SdkH5Config): void;
-  installAutoCapture(): void; // shorthand for adapter-js auto handlers
-  captureError(error: unknown, attributes?: Record<string, any>): void;
-  log(level: LogLevel, message: string, attributes?: Record<string, any>): void;
-  setUser(userId?: string): void;
-  setContext(context: Partial<LogEnvelope["context"]>): void;
-  flush(): Promise<void>;
-  shutdown(): Promise<void>;
-}
-```
-
-
-## Auto-Capture Behavior
-- `window.onerror`: capture uncaught runtime errors
-- `window.onunhandledrejection`: capture unhandled promise rejections
-- Resource errors: `addEventListener('error', ..., true)` captures `<img>/<script>/<link>` load errors
-- Vue plugin: hooks `app.config.errorHandler` (Vue 3) or `Vue.config.errorHandler` (Vue 2)
-- Optional: console breadcrumb hooking (disabled by default)
-
-
-## Minimal Configuration Defaults
-- `flushIntervalMs`: 2000 ms
-- `batchMaxRecords`: 100; `batchMaxBytes`: 512 KB
-- `maxRetries`: 3 with exponential backoff (`backoffMs`=1000 + jitter)
-- `useSendBeacon`: true (used on page unload); fallback to sync `fetch` if not available
-- `enableOfflineBuffer`: true (localStorage, small ring buffer)
-- `sampleRate`: 1 (set < 1 for high-volume types); `rateLimitPerMin`: 300
-- Redaction: remove URL query by default; strip configured headers; optional custom filter
-
-
-## Transport Details (Direct to Loki)
-- Endpoint: `POST {loki}/loki/api/v1/push`
-- Content-Type: `application/json`
-- Request body: Loki Push payload (see above)
-- Timestamp: nanoseconds as string
-- Keepalive: `fetch(..., { keepalive: true })` to work with page unload
-- On `visibilitychange`/`pagehide`/`beforeunload`: try `navigator.sendBeacon` for final flush
-- Retries: on 5xx/429 with exponential backoff; do not retry on 4xx (except 429)
-- CORS: Loki must allow browser origin (or place a gateway/proxy in front)
-
-
-## Pseudocode (Core)
-```ts
-class SdkH5Impl implements SdkH5 {
-  private cfg!: SdkH5Config;
-  private queue: LogEnvelope[] = [];
-  private timer: number | undefined;
-  private context: GlobalContext;
-  private limiter: RateLimiter;
-
-  init(cfg: SdkH5Config) {
-    this.cfg = withDefaults(cfg);
-    this.context = buildInitialContext(cfg);
-    this.limiter = new RateLimiter(this.cfg.rateLimitPerMin);
-    this.timer = window.setInterval(() => this.flush(), this.cfg.flushIntervalMs);
-    if (this.cfg.enableOfflineBuffer) restoreFromStorage(this.queue);
-    bindLifecycleEvents(() => this.flush());
-  }
-
-  installAutoCapture() { installAutoCapture(this); }
-
-  captureError(error: unknown, attributes?: Record<string, any>) {
-    if (!sample(this.cfg.sampleRate)) return;
-    const env = buildErrorEnvelope(error, this.context, attributes);
-    this.enqueue(env);
-  }
-
-  log(level: LogLevel, message: string, attributes?: Record<string, any>) {
-    const env = buildLogEnvelope(level, message, this.context, attributes);
-    this.enqueue(env);
-  }
-
-  private enqueue(env: LogEnvelope) {
-    const filtered = applyRedaction(env, this.cfg.redact);
-    if (!filtered) return;
-    if (!this.limiter.allow()) return;
-    this.queue.push(filtered);
-    if (shouldFlush(this.queue, this.cfg)) this.flush();
-    if (this.cfg.enableOfflineBuffer) persistToStorage(this.queue);
-  }
-
-  async flush() {
-    const batch = drainBatch(this.queue, this.cfg);
-    if (batch.length === 0) return;
-    const payload = toLokiPayload(batch, this.context, this.cfg);
-    try {
-      await retry(() => httpPost(this.cfg.endpoints.loki, payload, this.cfg), this.cfg.maxRetries, this.cfg.backoffMs);
-    } catch (err) {
-      this.cfg.onError?.(err as Error);
-      // optional: requeue head if storage enabled
+    "app": {
+      "name": "demo-h5",
+      "version": "1.0.0",
+      "env": "staging"
+    },
+    "user": {
+      "id": "user-123",
+      "sessionId": "session-456"
+    },
+    "page": {
+      "url": "https://example.com/login",
+      "path": "/login",
+      "referrer": "https://example.com/"
+    },
+    "device": {
+      "ua": "Mozilla/5.0...",
+      "platform": "web",
+      "language": "en-US",
+      "viewport": "1920x1080"
     }
   }
-
-  async shutdown() {
-    window.clearInterval(this.timer);
-    await this.flush();
-  }
 }
 ```
 
+## 🔒 Security & Privacy
 
-## Vue Plugin Pseudocode
-```ts
-export function createSdkVuePlugin(sdk: SdkH5) {
-  return {
-    install(app) {
-      const prev = app.config.errorHandler;
-      app.config.errorHandler = (err, instance, info) => {
-        sdk.captureError(err, { vueInfo: info });
-        prev?.(err, instance, info);
-      };
-      app.provide("$sdkH5", sdk);
-    }
-  };
-}
-```
+- Prefer proxying Loki behind a gateway to centralize CORS/auth/rate-limit
+- Redact sensitive headers (`authorization`, `cookie`, etc.) and URL query by default
+- Avoid sending PII unless absolutely necessary; use `redact.custom` to drop or transform
+- Default redaction of sensitive headers (`authorization`, `cookie`, etc.)
+- Support custom data filtering and transformation
+- Avoid sending PII (Personally Identifiable Information)
+- Recommend using proxy gateway in production environment
 
+## Demo
 
-## RN Stub Pseudocode (Optional)
-```ts
-export function installRnGlobalHandlers(sdk: SdkH5) {
-  const prev = (global as any).ErrorUtils?.getGlobalHandler?.();
-  (global as any).ErrorUtils?.setGlobalHandler?.((error: any, isFatal: boolean) => {
-    sdk.captureError(error, { rnIsFatal: isFatal });
-    prev?.(error, isFatal);
-  });
-}
-```
+See the [demo](./demo/h5/) for a complete working example with:
+- Error triggering buttons
+- Real-time log viewing
+- Configuration examples
 
+## 🛠️ Troubleshooting
 
-## Security & Privacy
-- Prefer proxying Loki behind a gateway to centralize CORS/auth/rate-limit.
-- Redact sensitive headers (`authorization`, `cookie`, etc.) and URL query by default.
-- Avoid sending PII unless absolutely necessary; use `redact.custom` to drop or transform.
+- **4xx errors**: Check CORS and auth at Loki/gateway
+- **429/5xx**: SDK retries with backoff; consider reducing sample rate or increasing gateway limits
+- **No logs in Grafana**: Verify Loki labels match queries (`{app="demo-h5"}`) and time range
+- **4xx errors**: Check CORS and authentication configuration
+- **429/5xx errors**: SDK automatically retries, can adjust sampling rate
+- **No logs displayed**: Check Loki query labels and time range
 
+## 📄 License
 
-## Demo App (Plan)
-- Simple H5 page with buttons to trigger:
-  - Throw JS error
-  - Unhandled promise rejection
-  - Load a missing image (resource error)
-  - Custom info log
-- Configurable endpoint via query string/env
-- Demonstrate final flush on page close
-
-
-## Roadmap
-- IndexedDB offline spool for larger volumes
-- Breadcrumbs (console/XHR/fetch) toggle
-- OTLP/HTTP transport (optional) via Collector
-- Source maps integration for stack trace symbolication (server-side)
-
-
-## Troubleshooting
-- 4xx errors: check CORS and auth at Loki/gateway
-- 429/5xx: SDK retries with backoff; consider reducing sample rate or increasing gateway limits
-- No logs in Grafana: verify Loki labels match queries (`{app="demo-h5"}`) and time range
+MIT License - see [LICENSE](./LICENSE) file for details
