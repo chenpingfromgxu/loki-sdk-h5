@@ -232,7 +232,7 @@ async function retry(fn, maxRetries, baseBackoffMs) {
 }
 
 // src/sdk.ts
-import { LokiTransport } from "@chenpingfromgxu/sdk-h5-transport-loki";
+import { LokiTransport } from "@ppyuesheng-org/sdk-h5-transport-loki";
 var SdkH5Impl = class {
   constructor() {
     this.queue = [];

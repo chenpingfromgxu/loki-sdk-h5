@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "build": "pnpm -r build",
-    "build:umd": "pnpm --filter @chenpingfromgxu/sdk-h5-core build:umd",
+    "build:umd": "pnpm --filter @ppyuesheng-org/sdk-h5-core build:umd",
     "clean": "rimraf packages/*/dist"
   },
   "devDependencies": {

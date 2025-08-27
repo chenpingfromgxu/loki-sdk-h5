@@ -1,6 +1,6 @@
-import type { SdkH5Config, LogEnvelope } from '@chenpingfromgxu/sdk-h5-transport-loki';
+import type { SdkH5Config, LogEnvelope } from '@ppyuesheng-org/sdk-h5-transport-loki';
 import type { SdkH5, LogLevel, GlobalContext } from './types.js';
-import { LokiTransport } from '@chenpingfromgxu/sdk-h5-transport-loki';
+import { LokiTransport } from '@ppyuesheng-org/sdk-h5-transport-loki';
 import {
   RateLimiter,
   withDefaults,
