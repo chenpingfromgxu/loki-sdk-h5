@@ -62,6 +62,7 @@ export function buildInitialContext(cfg: SdkH5Config): GlobalContext {
   
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
   const language = typeof navigator !== 'undefined' ? navigator.language : '';
+  const browser = detectBrowser(ua);
   
   let viewport = '';
   let dpi = 1;
@@ -87,12 +88,51 @@ export function buildInitialContext(cfg: SdkH5Config): GlobalContext {
       language,
       viewport,
       dpi,
+      browser,
     },
   };
 }
 
 export function generateSessionId(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
+export function detectBrowser(userAgent: string): string {
+  if (!userAgent) return 'unknown';
+  
+  const ua = userAgent.toLowerCase();
+  
+  // Check for Edge first (contains "chrome" in UA)
+  if (ua.includes('edg/') || ua.includes('edge/')) {
+    return 'edge';
+  }
+  
+  // Check for Chrome (should be before Safari since Chrome contains "safari")
+  if (ua.includes('chrome/') && !ua.includes('edg/')) {
+    return 'chrome';
+  }
+  
+  // Check for Firefox
+  if (ua.includes('firefox/')) {
+    return 'firefox';
+  }
+  
+  // Check for Safari (should be after Chrome check)
+  if (ua.includes('safari/') && !ua.includes('chrome/')) {
+    return 'safari';
+  }
+  
+  // Check for Opera
+  if (ua.includes('opera/') || ua.includes('opr/')) {
+    return 'opera';
+  }
+  
+  // Check for Internet Explorer
+  if (ua.includes('msie') || ua.includes('trident/')) {
+    return 'ie';
+  }
+  
+  return 'unknown';
 }
 
 export function sample(rate: number): boolean {
@@ -102,7 +142,8 @@ export function sample(rate: number): boolean {
 export function buildErrorEnvelope(
   error: unknown,
   context: GlobalContext,
-  attributes?: Record<string, any>
+  attributes?: Record<string, any>,
+  title?: string
 ): LogEnvelope {
   const timestampNs = (Date.now() * 1_000_000).toString();
   
@@ -124,6 +165,7 @@ export function buildErrorEnvelope(
     level: 'error',
     type: 'js_error',
     message,
+    title,
     stack,
     attributes,
     context,
@@ -134,7 +176,8 @@ export function buildLogEnvelope(
   level: 'debug' | 'info' | 'warn' | 'error',
   message: string,
   context: GlobalContext,
-  attributes?: Record<string, any>
+  attributes?: Record<string, any>,
+  title?: string
 ): LogEnvelope {
   const timestampNs = (Date.now() * 1_000_000).toString();
   
@@ -143,6 +186,7 @@ export function buildLogEnvelope(
     level,
     type: 'manual_log',
     message,
+    title,
     attributes,
     context,
   };

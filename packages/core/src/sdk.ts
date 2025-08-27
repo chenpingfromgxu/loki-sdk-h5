@@ -57,19 +57,19 @@ export class SdkH5Impl implements SdkH5 {
     // or should be imported separately from adapter packages
   }
 
-  captureError(error: unknown, attributes?: Record<string, any>): void {
+  captureError(error: unknown, attributes?: Record<string, any>, title?: string): void {
     if (!this.cfg || this.isShuttingDown) return;
     
     if (!sample(this.cfg.sampleRate)) return;
     
-    const envelope = buildErrorEnvelope(error, this.context, attributes);
+    const envelope = buildErrorEnvelope(error, this.context, attributes, title);
     this.enqueue(envelope);
   }
 
-  log(level: LogLevel, message: string, attributes?: Record<string, any>): void {
+  log(level: LogLevel, message: string, attributes?: Record<string, any>, title?: string): void {
     if (!this.cfg || this.isShuttingDown) return;
     
-    const envelope = buildLogEnvelope(level, message, this.context, attributes);
+    const envelope = buildLogEnvelope(level, message, this.context, attributes, title);
     this.enqueue(envelope);
   }
 

@@ -50,6 +50,7 @@ function buildInitialContext(cfg) {
   const referrer = typeof document !== "undefined" ? document.referrer : "";
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const language = typeof navigator !== "undefined" ? navigator.language : "";
+  const browser = detectBrowser(ua);
   let viewport = "";
   let dpi = 1;
   if (typeof window !== "undefined") {
@@ -72,17 +73,42 @@ function buildInitialContext(cfg) {
       platform: "web",
       language,
       viewport,
-      dpi
+      dpi,
+      browser
     }
   };
 }
 function generateSessionId() {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
+function detectBrowser(userAgent) {
+  if (!userAgent)
+    return "unknown";
+  const ua = userAgent.toLowerCase();
+  if (ua.includes("edg/") || ua.includes("edge/")) {
+    return "edge";
+  }
+  if (ua.includes("chrome/") && !ua.includes("edg/")) {
+    return "chrome";
+  }
+  if (ua.includes("firefox/")) {
+    return "firefox";
+  }
+  if (ua.includes("safari/") && !ua.includes("chrome/")) {
+    return "safari";
+  }
+  if (ua.includes("opera/") || ua.includes("opr/")) {
+    return "opera";
+  }
+  if (ua.includes("msie") || ua.includes("trident/")) {
+    return "ie";
+  }
+  return "unknown";
+}
 function sample(rate) {
   return Math.random() < rate;
 }
-function buildErrorEnvelope(error, context, attributes) {
+function buildErrorEnvelope(error, context, attributes, title) {
   const timestampNs = (Date.now() * 1e6).toString();
   let message = "Unknown error";
   let stack;
@@ -100,18 +126,20 @@ function buildErrorEnvelope(error, context, attributes) {
     level: "error",
     type: "js_error",
     message,
+    title,
     stack,
     attributes,
     context
   };
 }
-function buildLogEnvelope(level, message, context, attributes) {
+function buildLogEnvelope(level, message, context, attributes, title) {
   const timestampNs = (Date.now() * 1e6).toString();
   return {
     timestampNs,
     level,
     type: "manual_log",
     message,
+    title,
     attributes,
     context
   };
@@ -204,7 +232,7 @@ async function retry(fn, maxRetries, baseBackoffMs) {
 }
 
 // src/sdk.ts
-import { LokiTransport } from "@sdk-h5/transport-loki";
+import { LokiTransport } from "@chenpingfromgxu/sdk-h5-transport-loki";
 var SdkH5Impl = class {
   constructor() {
     this.queue = [];
@@ -230,18 +258,18 @@ var SdkH5Impl = class {
   }
   installAutoCapture() {
   }
-  captureError(error, attributes) {
+  captureError(error, attributes, title) {
     if (!this.cfg || this.isShuttingDown)
       return;
     if (!sample(this.cfg.sampleRate))
       return;
-    const envelope = buildErrorEnvelope(error, this.context, attributes);
+    const envelope = buildErrorEnvelope(error, this.context, attributes, title);
     this.enqueue(envelope);
   }
-  log(level, message, attributes) {
+  log(level, message, attributes, title) {
     if (!this.cfg || this.isShuttingDown)
       return;
-    const envelope = buildLogEnvelope(level, message, this.context, attributes);
+    const envelope = buildLogEnvelope(level, message, this.context, attributes, title);
     this.enqueue(envelope);
   }
   setUser(userId) {
@@ -368,6 +396,7 @@ export {
   SdkH5Impl,
   buildErrorEnvelope,
   buildLogEnvelope,
+  detectBrowser,
   generateSessionId,
   installAutoCapture,
   sdkH5

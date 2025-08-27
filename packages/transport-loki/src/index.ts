@@ -4,7 +4,7 @@ type GlobalContext = {
   app: { name: string; version?: string; env?: string; release?: string };
   user?: { id?: string; sessionId?: string };
   page: { url: string; path: string; referrer?: string };
-  device: { ua: string; platform: string; language?: string; viewport?: string; dpi?: number };
+  device: { ua: string; platform: string; language?: string; viewport?: string; dpi?: number; browser?: string };
 };
 
 export type LogEnvelope = {
@@ -12,6 +12,7 @@ export type LogEnvelope = {
   level: LogLevel;
   type: string;
   message: string;
+  title?: string;
   stack?: string;
   attributes?: Record<string, any>;
   context: GlobalContext;
@@ -64,6 +65,7 @@ export class LokiTransport {
       level: record.level,
       type: record.type,
       message: record.message,
+      title: record.title,
       stack: record.stack,
       attributes: record.attributes,
       context: record.context

@@ -21,6 +21,7 @@ type GlobalContext = {
         language?: string;
         viewport?: string;
         dpi?: number;
+        browser?: string;
     };
 };
 type LogEnvelope = {
@@ -28,6 +29,7 @@ type LogEnvelope = {
     level: LogLevel;
     type: string;
     message: string;
+    title?: string;
     stack?: string;
     attributes?: Record<string, any>;
     context: GlobalContext;
