@@ -1,85 +1,92 @@
-# SDK-H5 Demo 使用说明
+# H5 SDK Demo - NPM版本
 
-这个demo展示了如何使用SDK代理模式来解决CORS问题。
+这个demo展示了如何使用通过npm安装的H5 SDK。
 
-## 运行方式
+## 环境要求
 
-### 开发模式（推荐）
+- Node.js 18+
+- pnpm 或 npm
+- GitHub Token（用于访问GitHub Packages）
+
+## 设置步骤
+
+### 1. 配置GitHub Token
+
+在项目根目录创建 `.env` 文件：
+
 ```bash
+GITHUB_TOKEN=your_github_token_here
+```
+
+或者直接在 `.npmrc` 文件中设置：
+
+```bash
+@chenpingfromgxu:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=your_github_token_here
+```
+
+### 2. 安装依赖
+
+```bash
+# 使用pnpm
+pnpm install
+
+# 或使用npm
+npm install
+```
+
+### 3. 启动开发服务器
+
+```bash
+# 使用pnpm
+pnpm dev
+
+# 或使用npm
 npm run dev
 ```
 
-开发模式会启动Vite开发服务器，自动代理 `/api/loki/*` 请求到 `http://47.77.196.223:3100`。
+## 功能说明
 
-### 生产构建
-```bash
-npm run build
-npm run preview
-```
+这个demo包含以下功能：
 
-## 配置说明
+- **错误捕获**：自动捕获JavaScript错误
+- **Promise拒绝**：捕获未处理的Promise拒绝
+- **资源加载错误**：捕获图片等资源加载失败
+- **自定义日志**：手动发送日志信息
 
-### 1. SDK配置 (main.ts)
-- `useProxy: true` - 启用代理模式
-- `proxyPath: '/api/loki'` - 代理路径前缀  
-- `corsMode: 'same-origin'` - 避免CORS问题
+## 代理配置
 
-### 2. Vite代理配置 (vite.config.ts)
-- 将 `/api/loki/*` 代理到 `http://47.77.196.223:3100/*`
-- 自动处理路径重写
-- 添加调试日志
+demo使用Vite代理来解决CORS问题：
 
-## 测试功能
+- 开发环境：通过Vite代理到Loki服务器
+- 生产环境：需要配置Nginx代理
 
-页面提供4个测试按钮：
+## 文件说明
 
-1. **Throw JS Error** - 触发JavaScript错误，测试自动错误捕获
-2. **Unhandled Rejection** - 触发未处理的Promise拒绝
-3. **Load Missing Image** - 触发资源加载错误
-4. **Custom Info Log** - 发送自定义日志
-
-## 验证方法
-
-1. 打开浏览器开发者工具
-2. 切换到Network面板
-3. 点击测试按钮
-4. 查看网络请求：
-   - 应该看到发送到 `/api/loki/loki/api/v1/push` 的POST请求
-   - 状态码应该是200（成功）或者显示具体的错误信息
-   - 不应该再有CORS错误
+- `main.ts`：主要入口文件，使用SDK核心功能
+- `main-proxy.ts`：代理模式示例
+- `index.html`：HTML页面
+- `vite.config.ts`：Vite配置，包含代理设置
 
 ## 故障排查
 
-### 如果仍然出现CORS错误：
+### 1. 包安装失败
 
-1. **确认Vite代理配置**
-   ```bash
-   # 检查控制台是否有代理日志
-   # 应该显示: "Sending Request to the Target: POST /api/loki/loki/api/v1/push"
-   ```
+确保：
+- GitHub Token有效且有读取包的权限
+- `.npmrc` 配置正确
+- 网络连接正常
 
-2. **检查SDK配置**
-   ```typescript
-   // 确认这些配置存在
-   useProxy: true,
-   proxyPath: '/api/loki',
-   corsMode: 'same-origin'
-   ```
+### 2. 导入错误
 
-3. **验证Loki服务**
-   ```bash
-   # 直接测试Loki端点是否可访问
-   curl -X POST http://47.77.196.223:3100/loki/api/v1/push \
-     -H "Content-Type: application/json" \
-     -d '{"streams":[]}'
-   ```
+确保：
+- 包已正确安装
+- 导入路径正确：`@chenpingfromgxu/sdk-h5-core`
+- TypeScript配置正确
 
-4. **重启开发服务器**
-   ```bash
-   # 停止当前服务器 (Ctrl+C)
-   npm run dev
-   ```
+### 3. 代理问题
 
-## 生产环境部署
-
-生产环境需要配置Nginx或其他代理服务器，参考项目根目录的 `nginx-loki-proxy.conf` 文件。
+检查：
+- Vite代理配置是否正确
+- Loki服务器是否可访问
+- 网络连接是否正常

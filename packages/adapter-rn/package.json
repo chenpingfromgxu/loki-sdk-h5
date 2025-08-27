@@ -1,5 +1,5 @@
 {
-  "name": "@chenpingfromgxu/sdk-h5-adapter-rn",
+  "name": "@ppyuesheng-org/sdk-h5-adapter-rn",
   "version": "0.1.0",
   "description": "H5 SDK React Native适配器 - 为React Native应用提供日志收集集成",
   "type": "module",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chenpingfromgxu/py-gitea.git",
+    "url": "git+https://github.com/ppyuesheng-org/py-gitea.git",
     "directory": "sdk-h5/packages/adapter-rn"
   },
   "publishConfig": {

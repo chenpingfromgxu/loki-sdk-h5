@@ -6,12 +6,12 @@
 
 ```bash
 # 安装核心包
-npm install @chenpingfromgxu/sdk-h5-core
+npm install @ppyuesheng.org/sdk-h5-core
 
 # 按需安装适配器
-npm install @chenpingfromgxu/sdk-h5-adapter-vue    # Vue应用
-npm install @chenpingfromgxu/sdk-h5-adapter-js     # 普通JS应用
-npm install @chenpingfromgxu/sdk-h5-adapter-rn     # React Native应用
+npm install @ppyuesheng.org/sdk-h5-adapter-vue    # Vue应用
+npm install @ppyuesheng.org/sdk-h5-adapter-js     # 普通JS应用
+npm install @ppyuesheng.org/sdk-h5-adapter-rn     # React Native应用
 ```
 
 ### 2. 配置NPM认证
@@ -19,7 +19,7 @@ npm install @chenpingfromgxu/sdk-h5-adapter-rn     # React Native应用
 在项目根目录创建 `.npmrc` 文件：
 
 ```
-@chenpingfromgxu:registry=https://npm.pkg.github.com
+@ppyuesheng.org:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
 ```
 
@@ -27,15 +27,17 @@ npm install @chenpingfromgxu/sdk-h5-adapter-rn     # React Native应用
 
 #### Vue 3 应用
 ```typescript
-import { sdkH5, installAutoCapture } from '@chenpingfromgxu/sdk-h5-core';
-import { createSdkVuePlugin } from '@chenpingfromgxu/sdk-h5-adapter-vue';
+import { sdkH5, installAutoCapture } from '@ppyuesheng.org/sdk-h5-core';
+import { createSdkVuePlugin } from '@ppyuesheng.org/sdk-h5-adapter-vue';
 
-// 初始化SDK
+// 初始化SDK（使用代理模式）
 sdkH5.init({
   appName: 'my-vue-app',
   environment: 'prod',
+  endpoints: { loki: 'unused-in-proxy-mode' },
   useProxy: true,
-  proxyPath: '/api/loki'
+  proxyPath: '/api/loki',
+  corsMode: 'same-origin'
 });
 
 // 安装自动错误捕获
@@ -48,11 +50,12 @@ app.use(createSdkVuePlugin(sdkH5));
 
 #### 普通JS应用
 ```typescript
-import { sdkH5, installAutoCapture } from '@chenpingfromgxu/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng.org/sdk-h5-core';
 
 sdkH5.init({
   appName: 'my-js-app',
   environment: 'prod',
+  endpoints: { loki: 'unused-in-proxy-mode' },
   useProxy: true,
   proxyPath: '/api/loki'
 });
@@ -65,12 +68,13 @@ sdkH5.log('info', 'User action', { action: 'click_button' });
 
 #### React Native应用
 ```typescript
-import { sdkH5 } from '@chenpingfromgxu/sdk-h5-core';
-import { installRnGlobalHandlers } from '@chenpingfromgxu/sdk-h5-adapter-rn';
+import { sdkH5 } from '@ppyuesheng.org/sdk-h5-core';
+import { installRnGlobalHandlers } from '@ppyuesheng.org/sdk-h5-adapter-rn';
 
 sdkH5.init({
   appName: 'my-rn-app',
   endpoints: { loki: 'https://your-api.com/loki/api/v1/push' },
+  // RN环境通常直连，不需要代理
   useProxy: false
 });
 
