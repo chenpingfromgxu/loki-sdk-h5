@@ -1,6 +1,7 @@
 {
   "name": "@chenpingfromgxu/sdk-h5-transport-loki",
   "version": "0.1.0",
+  "description": "H5 SDK Loki传输层 - 提供日志数据到Loki的传输功能",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -15,6 +16,16 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "sdk",
+    "loki",
+    "transport",
+    "logging",
+    "monitoring",
+    "typescript"
+  ],
+  "author": "chenpingfromgxu",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chenpingfromgxu/py-gitea.git",
