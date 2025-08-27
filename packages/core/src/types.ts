@@ -1,4 +1,4 @@
-import type { LogEnvelope, SdkH5Config } from '@chenpingfromgxu/sdk-h5-transport-loki';
+import type { LogEnvelope, SdkH5Config } from '@ppyuesheng-org/sdk-h5-transport-loki';
 
 // Re-export types from transport-loki to maintain a clean API
 export type { LogEnvelope, SdkH5Config };
