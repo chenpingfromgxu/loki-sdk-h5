@@ -12,6 +12,7 @@ export {
   buildErrorEnvelope,
   buildLogEnvelope,
   generateSessionId,
+  detectBrowser,
 } from './utils.js';
 
 // Export the main SDK implementation

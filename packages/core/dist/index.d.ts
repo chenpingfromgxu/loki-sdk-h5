@@ -24,13 +24,14 @@ type GlobalContext = {
         language?: string;
         viewport?: string;
         dpi?: number;
+        browser?: string;
     };
 };
 interface SdkH5 {
     init(config: SdkH5Config): void;
     installAutoCapture(): void;
-    captureError(error: unknown, attributes?: Record<string, any>): void;
-    log(level: LogLevel, message: string, attributes?: Record<string, any>): void;
+    captureError(error: unknown, attributes?: Record<string, any>, title?: string): void;
+    log(level: LogLevel, message: string, attributes?: Record<string, any>, title?: string): void;
     setUser(userId?: string): void;
     setContext(context: Partial<LogEnvelope["context"]>): void;
     flush(): Promise<void>;
@@ -38,8 +39,9 @@ interface SdkH5 {
 }
 
 declare function generateSessionId(): string;
-declare function buildErrorEnvelope(error: unknown, context: GlobalContext, attributes?: Record<string, any>): LogEnvelope;
-declare function buildLogEnvelope(level: 'debug' | 'info' | 'warn' | 'error', message: string, context: GlobalContext, attributes?: Record<string, any>): LogEnvelope;
+declare function detectBrowser(userAgent: string): string;
+declare function buildErrorEnvelope(error: unknown, context: GlobalContext, attributes?: Record<string, any>, title?: string): LogEnvelope;
+declare function buildLogEnvelope(level: 'debug' | 'info' | 'warn' | 'error', message: string, context: GlobalContext, attributes?: Record<string, any>, title?: string): LogEnvelope;
 
 declare class SdkH5Impl implements SdkH5 {
     private cfg;
@@ -51,8 +53,8 @@ declare class SdkH5Impl implements SdkH5 {
     private isShuttingDown;
     init(config: SdkH5Config): void;
     installAutoCapture(): void;
-    captureError(error: unknown, attributes?: Record<string, any>): void;
-    log(level: LogLevel, message: string, attributes?: Record<string, any>): void;
+    captureError(error: unknown, attributes?: Record<string, any>, title?: string): void;
+    log(level: LogLevel, message: string, attributes?: Record<string, any>, title?: string): void;
     setUser(userId?: string): void;
     setContext(context: Partial<LogEnvelope["context"]>): void;
     flush(): Promise<void>;
@@ -64,4 +66,4 @@ declare class SdkH5Impl implements SdkH5 {
 declare const sdkH5: SdkH5Impl;
 declare function installAutoCapture(sdk?: SdkH5Impl): void;
 
-export { type GlobalContext, type LogLevel, type SdkH5, SdkH5Impl, buildErrorEnvelope, buildLogEnvelope, generateSessionId, installAutoCapture, sdkH5 };
+export { type GlobalContext, type LogLevel, type SdkH5, SdkH5Impl, buildErrorEnvelope, buildLogEnvelope, detectBrowser, generateSessionId, installAutoCapture, sdkH5 };

@@ -17,6 +17,7 @@ var LokiTransport = class {
       level: record.level,
       type: record.type,
       message: record.message,
+      title: record.title,
       stack: record.stack,
       attributes: record.attributes,
       context: record.context

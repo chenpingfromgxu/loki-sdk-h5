@@ -1,6 +1,7 @@
 {
   "name": "@chenpingfromgxu/sdk-h5-core",
   "version": "0.1.0",
+  "description": "H5 SDK核心包 - 提供日志收集和上报功能",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -14,6 +15,16 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "sdk",
+    "h5",
+    "logging",
+    "monitoring",
+    "loki",
+    "typescript"
+  ],
+  "author": "chenpingfromgxu",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chenpingfromgxu/py-gitea.git",

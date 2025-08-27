@@ -1,6 +1,7 @@
 {
   "name": "@chenpingfromgxu/sdk-h5-adapter-rn",
   "version": "0.1.0",
+  "description": "H5 SDK React Native适配器 - 为React Native应用提供日志收集集成",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -15,6 +16,16 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "sdk",
+    "react-native",
+    "adapter",
+    "logging",
+    "monitoring",
+    "typescript"
+  ],
+  "author": "chenpingfromgxu",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chenpingfromgxu/py-gitea.git",

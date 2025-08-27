@@ -4,7 +4,8 @@
 
 - 简单接入：一次 `init`，可选 `installAutoCapture`，最小配置
 - 自动采集：JS 全局错误、未处理 Promise 拒绝、资源加载错误；Vue 插件
-- 手动日志：`log()` 与 `captureError()`
+- 手动日志：`log()` 与 `captureError()`，支持标题和日志级别
+- 浏览器检测：自动识别浏览器类型（Chrome、Firefox、Safari、Edge等）
 - 可靠传输：小队列 + 批量 + 重试 + 页面卸载时 sendBeacon
 - 隐私控制：基础脱敏钩子
 
@@ -25,8 +26,15 @@
   });
   sdkH5.installAutoCapture();
 
-  // 手动日志
-  sdkH5.log("info", "page_loaded", { path: location.pathname });
+  // 手动日志（支持title参数）
+  sdkH5.log("info", "page_loaded", { path: location.pathname }, "页面加载");
+  
+  // 错误捕获（支持title参数）
+  try {
+    // 一些可能出错的代码
+  } catch (error) {
+    sdkH5.captureError(error, { source: "user_action" }, "用户操作错误");
+  }
 </script>
 ```
 
@@ -158,8 +166,8 @@ type SdkH5Config = {
 interface SdkH5 {
   init(config: SdkH5Config): void;
   installAutoCapture(): void; // 适配器快捷安装
-  captureError(error: unknown, attributes?: Record<string, any>): void;
-  log(level: LogLevel, message: string, attributes?: Record<string, any>): void;
+  captureError(error: unknown, attributes?: Record<string, any>, title?: string): void;
+  log(level: LogLevel, message: string, attributes?: Record<string, any>, title?: string): void;
   setUser(userId?: string): void;
   setContext(context: Partial<LogEnvelope["context"]>): void;
   flush(): Promise<void>;
@@ -167,6 +175,43 @@ interface SdkH5 {
 }
 ```
 
+
+## 新增功能
+
+### 日志标题支持
+可以为每条日志添加可选的标题，便于在日志系统中快速识别和分类：
+
+```js
+// 带标题的日志记录
+sdkH5.log("info", "用户登录成功", { userId: "12345" }, "用户认证");
+sdkH5.log("warn", "API响应缓慢", { duration: 3000 }, "性能警告");
+
+// 带标题的错误捕获
+sdkH5.captureError(error, { component: "PaymentForm" }, "支付异常");
+```
+
+### 浏览器类型自动检测
+SDK会自动检测并记录用户的浏览器类型，支持：
+- `chrome` - Google Chrome
+- `firefox` - Mozilla Firefox  
+- `safari` - Apple Safari
+- `edge` - Microsoft Edge
+- `opera` - Opera
+- `ie` - Internet Explorer
+- `unknown` - 无法识别的浏览器
+
+浏览器信息会自动添加到设备上下文中：
+```json
+{
+  "context": {
+    "device": {
+      "browser": "chrome",
+      "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36...",
+      "platform": "web"
+    }
+  }
+}
+```
 
 ## 自动采集行为
 - `window.onerror`：捕获未处理运行时错误
@@ -217,14 +262,14 @@ class SdkH5Impl implements SdkH5 {
 
   installAutoCapture() { installAutoCapture(this); }
 
-  captureError(error: unknown, attributes?: Record<string, any>) {
+  captureError(error: unknown, attributes?: Record<string, any>, title?: string) {
     if (!sample(this.cfg.sampleRate)) return;
-    const env = buildErrorEnvelope(error, this.context, attributes);
+    const env = buildErrorEnvelope(error, this.context, attributes, title);
     this.enqueue(env);
   }
 
-  log(level: LogLevel, message: string, attributes?: Record<string, any>) {
-    const env = buildLogEnvelope(level, message, this.context, attributes);
+  log(level: LogLevel, message: string, attributes?: Record<string, any>, title?: string) {
+    const env = buildLogEnvelope(level, message, this.context, attributes, title);
     this.enqueue(env);
   }
 
