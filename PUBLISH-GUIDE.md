@@ -40,7 +40,7 @@ cp -r packages/*/dist /var/www/sdk-releases/latest/
 在你的应用项目中创建 `.npmrc` 文件：
 
 ```
-@chenpingfromgxu:registry=https://npm.pkg.github.com
+@ppyuesheng.org:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
 ```
 
@@ -48,19 +48,19 @@ cp -r packages/*/dist /var/www/sdk-releases/latest/
 
 ```bash
 # 安装核心包
-npm install @chenpingfromgxu/sdk-h5-core
+npm install @ppyuesheng.org/sdk-h5-core
 
 # 按需安装适配器
-npm install @chenpingfromgxu/sdk-h5-adapter-js
-npm install @chenpingfromgxu/sdk-h5-adapter-vue
+npm install @ppyuesheng.org/sdk-h5-adapter-js
+npm install @ppyuesheng.org/sdk-h5-adapter-vue
 ```
 
 #### 3. 使用示例
 
 ##### Vue 3应用
 ```typescript
-import { sdkH5, installAutoCapture } from '@chenpingfromgxu/sdk-h5-core';
-import { createSdkVuePlugin } from '@chenpingfromgxu/sdk-h5-adapter-vue';
+import { sdkH5, installAutoCapture } from '@ppyuesheng.org/sdk-h5-core';
+import { createSdkVuePlugin } from '@ppyuesheng.org/sdk-h5-adapter-vue';
 
 // 初始化SDK（使用代理模式）
 sdkH5.init({
@@ -82,7 +82,7 @@ app.use(createSdkVuePlugin(sdkH5));
 
 ##### 普通JS应用
 ```typescript
-import { sdkH5, installAutoCapture } from '@chenpingfromgxu/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng.org/sdk-h5-core';
 
 sdkH5.init({
   appName: 'my-js-app',
@@ -127,10 +127,10 @@ sdkH5.log('info', 'User action', { action: 'click_button' });
 
 ```bash
 # 更新到最新版本
-npm update @chenpingfromgxu/sdk-h5-core
+npm update @ppyuesheng.org/sdk-h5-core
 
 # 或指定版本
-npm install @chenpingfromgxu/sdk-h5-core@1.0.25
+npm install @ppyuesheng.org/sdk-h5-core@1.0.25
 ```
 
 ## 🌐 生产环境代理配置
@@ -228,7 +228,7 @@ if (process.env.NODE_ENV === 'development') {
 - 尝试清除npm缓存：`npm cache clean --force`
 
 ### 2. 导入错误
-- 确认包名正确：`@chenpingfromgxu/sdk-h5-core`
+- 确认包名正确：`@ppyuesheng.org/sdk-h5-core`
 - 检查TypeScript配置
 - 确保安装了所需的适配器包
 
@@ -246,8 +246,8 @@ if (process.env.NODE_ENV === 'development') {
 
 ### React Native
 ```typescript
-import { sdkH5 } from '@chenpingfromgxu/sdk-h5-core';
-import { installRnGlobalHandlers } from '@chenpingfromgxu/sdk-h5-adapter-rn';
+import { sdkH5 } from '@ppyuesheng.org/sdk-h5-core';
+import { installRnGlobalHandlers } from '@ppyuesheng.org/sdk-h5-adapter-rn';
 
 sdkH5.init({
   appName: 'my-rn-app',
@@ -262,7 +262,7 @@ installRnGlobalHandlers(sdkH5);
 ### 混合应用（Cordova/Ionic）
 ```typescript
 // 可以使用普通JS适配器
-import { sdkH5, installAutoCapture } from '@chenpingfromgxu/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng.org/sdk-h5-core';
 
 sdkH5.init({
   appName: 'my-hybrid-app',

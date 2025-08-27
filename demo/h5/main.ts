@@ -1,4 +1,4 @@
-import { sdkH5, installAutoCapture } from '@chenpingfromgxu/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
 
 // 使用代理模式避免CORS问题
 // 开发环境通过Vite代理，生产环境通过Nginx代理
@@ -16,8 +16,11 @@ sdkH5.init({
     console.error('SDK Error:', err);
   }
 });
+
+// 安装自动错误捕获
 installAutoCapture(sdkH5);
 
+// 绑定按钮事件
 (document.getElementById('btn-error') as HTMLButtonElement).onclick = () => {
   throw new Error('Boom from demo!');
 };

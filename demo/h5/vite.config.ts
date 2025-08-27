@@ -1,12 +1,6 @@
 import { defineConfig } from 'vite';
-import path from 'path';
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@chenpingfromgxu/sdk-h5-core': path.resolve(__dirname, '../../packages/core'),
-    },
-  },
   server: {
     proxy: {
       // 代理SDK的Loki请求，解决CORS问题

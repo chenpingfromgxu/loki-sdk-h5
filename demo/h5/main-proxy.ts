@@ -1,4 +1,4 @@
-import { sdkH5, installAutoCapture } from '@sdk-h5/core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
 
 // 代理模式配置 - 解决CORS问题
 // 需要配合Nginx或后端代理使用
@@ -14,9 +14,10 @@ sdkH5.init({
   corsMode: 'same-origin', // 同源模式，避免CORS问题
 });
 
+// 安装自动错误捕获
 installAutoCapture(sdkH5);
 
-// 事件绑定代码相同
+// 绑定按钮事件
 (document.getElementById('btn-error') as HTMLButtonElement).onclick = () => {
   throw new Error('Boom from demo!');
 };

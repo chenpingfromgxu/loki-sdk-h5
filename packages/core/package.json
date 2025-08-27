@@ -1,5 +1,5 @@
 {
-  "name": "@chenpingfromgxu/sdk-h5-core",
+  "name": "@ppyuesheng-org/sdk-h5-core",
   "version": "0.1.0",
   "description": "H5 SDK核心包 - 提供日志收集和上报功能",
   "type": "module",
@@ -27,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chenpingfromgxu/py-gitea.git",
+    "url": "git+https://github.com/ppyuesheng-org/py-gitea.git",
     "directory": "sdk-h5/packages/core"
   },
   "publishConfig": {
@@ -39,7 +39,7 @@
     "dev": "tsup --watch"
   },
   "dependencies": {
-    "@chenpingfromgxu/sdk-h5-transport-loki": "workspace:*"
+    "@ppyuesheng-org/sdk-h5-transport-loki": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^7.2.0",
