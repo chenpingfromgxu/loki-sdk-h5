@@ -1,31 +1,10 @@
-# H5 SDK Demo - NPM版本
+# H5 SDK Demo
 
-这个demo展示了如何使用通过npm安装的H5 SDK。
+这个demo展示了如何使用H5 SDK进行日志收集和错误监控。
 
-## 环境要求
+## 快速开始
 
-- Node.js 18+
-- pnpm 或 npm
-- GitHub Token（用于访问GitHub Packages）
-
-## 设置步骤
-
-### 1. 配置GitHub Token
-
-在项目根目录创建 `.env` 文件：
-
-```bash
-GITHUB_TOKEN=your_github_token_here
-```
-
-或者直接在 `.npmrc` 文件中设置：
-
-```bash
-@chenpingfromgxu:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=your_github_token_here
-```
-
-### 2. 安装依赖
+### 1. 安装依赖
 
 ```bash
 # 使用pnpm
@@ -35,7 +14,7 @@ pnpm install
 npm install
 ```
 
-### 3. 启动开发服务器
+### 2. 启动开发服务器
 
 ```bash
 # 使用pnpm
@@ -45,6 +24,10 @@ pnpm dev
 npm run dev
 ```
 
+### 3. 访问demo
+
+打开浏览器访问 http://localhost:5173
+
 ## 功能说明
 
 这个demo包含以下功能：
@@ -53,6 +36,15 @@ npm run dev
 - **Promise拒绝**：捕获未处理的Promise拒绝
 - **资源加载错误**：捕获图片等资源加载失败
 - **自定义日志**：手动发送日志信息
+
+## 测试功能
+
+页面提供4个测试按钮：
+
+1. **Throw JS Error** - 触发JavaScript错误，测试自动错误捕获
+2. **Unhandled Rejection** - 触发未处理的Promise拒绝
+3. **Load Missing Image** - 触发资源加载错误
+4. **Custom Info Log** - 发送自定义日志
 
 ## 代理配置
 
@@ -68,25 +60,12 @@ demo使用Vite代理来解决CORS问题：
 - `index.html`：HTML页面
 - `vite.config.ts`：Vite配置，包含代理设置
 
-## 故障排查
+## 验证方法
 
-### 1. 包安装失败
-
-确保：
-- GitHub Token有效且有读取包的权限
-- `.npmrc` 配置正确
-- 网络连接正常
-
-### 2. 导入错误
-
-确保：
-- 包已正确安装
-- 导入路径正确：`@chenpingfromgxu/sdk-h5-core`
-- TypeScript配置正确
-
-### 3. 代理问题
-
-检查：
-- Vite代理配置是否正确
-- Loki服务器是否可访问
-- 网络连接是否正常
+1. 打开浏览器开发者工具
+2. 切换到Network面板
+3. 点击测试按钮
+4. 查看网络请求：
+   - 应该看到发送到 `/api/loki/loki/api/v1/push` 的POST请求
+   - 状态码应该是200（成功）或者显示具体的错误信息
+   - 不应该再有CORS错误

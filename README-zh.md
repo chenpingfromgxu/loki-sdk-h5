@@ -1,7 +1,23 @@
-# sdk-h5：前端错误与日志采集 SDK（直连 Loki）
+# sdk-h5：前端错误与日志采集 SDK
+
+<div align="center">
+
+**轻量级前端错误采集和日志上报SDK**
+
+🚀 开箱即用 | 📦 模块化设计 | 🔒 隐私安全 | 🌐 跨平台支持
+
+</div>
 
 一个轻量、易接入的 H5/Web SDK（包含 Vue 适配器与 RN 基础支持），用于自动捕获常见前端错误，同时提供简单的手动日志能力，将数据直接推送到 Loki 的 `/loki/api/v1/push` 接口。
 
+## ✨ 特性
+
+- **🎯 轻量级**: 核心包仅 ~10KB，按需加载适配器
+- **🔧 易集成**: 一行代码完成初始化，支持多种框架
+- **🛡️ 可靠传输**: 批量上报 + 重试机制 + 离线缓存
+- **🔒 隐私保护**: 数据脱敏 + 采样控制 + 自定义过滤
+- **🌐 跨平台**: 支持 Web、Vue、React Native
+- **⚡ 高性能**: 异步处理 + 智能防抖 + 内存优化
 - 简单接入：一次 `init`，可选 `installAutoCapture`，最小配置
 - 自动采集：JS 全局错误、未处理 Promise 拒绝、资源加载错误；Vue 插件
 - 手动日志：`log()` 与 `captureError()`，支持标题和日志级别
@@ -9,56 +25,54 @@
 - 可靠传输：小队列 + 批量 + 重试 + 页面卸载时 sendBeacon
 - 隐私控制：基础脱敏钩子
 
+## 🚀 快速开始
 
-## 快速开始（TL;DR）
+### 安装
 
-### CDN/UMD（原生 JS）
-```html
-<script src="/path/to/sdk-h5.umd.js"></script>
-<script>
-  sdkH5.init({
-    appName: "demo-h5",
-    environment: "staging",
-    endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
-    transport: "loki", // 默认
-    useSendBeacon: true,
-    enableOfflineBuffer: true,
-  });
-  sdkH5.installAutoCapture();
+```bash
+# 安装核心包
+npm install @ppyuesheng-org/sdk-h5-core
 
-  // 手动日志（支持title参数）
-  sdkH5.log("info", "page_loaded", { path: location.pathname }, "页面加载");
-  
-  // 错误捕获（支持title参数）
-  try {
-    // 一些可能出错的代码
-  } catch (error) {
-    sdkH5.captureError(error, { source: "user_action" }, "用户操作错误");
-  }
-</script>
+# 按需安装适配器
+npm install @ppyuesheng-org/sdk-h5-adapter-vue    # Vue应用
+npm install @ppyuesheng-org/sdk-h5-adapter-js     # 普通JS应用
+npm install @ppyuesheng-org/sdk-h5-adapter-rn     # React Native应用
 ```
 
-### NPM（ESM）
-```ts
-import { sdkH5 } from "@sdk-h5/core";
-import { installAutoCapture } from "@sdk-h5/adapter-js";
+### 基础使用
 
+```typescript
+import { sdkH5, installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
+
+// 初始化SDK
 sdkH5.init({
   appName: "demo-h5",
+  environment: "staging",
   endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
+  useSendBeacon: true,
+  enableOfflineBuffer: true,
 });
+
+// 启用自动错误捕获
 installAutoCapture(sdkH5);
+
+// 手动日志
+sdkH5.log("info", "page_loaded", { path: location.pathname }, "页面加载");
 ```
 
-### Vue 3
-```ts
+### Vue 3 集成
+
+```typescript
 import { createApp } from "vue";
 import App from "./App.vue";
-import { sdkH5 } from "@sdk-h5/core";
-import { installAutoCapture } from "@sdk-h5/adapter-js";
-import { createSdkVuePlugin } from "@sdk-h5/adapter-vue";
+import { sdkH5 } from "@ppyuesheng-org/sdk-h5-core";
+import { installAutoCapture } from "@ppyuesheng-org/sdk-h5-core";
+import { createSdkVuePlugin } from "@ppyuesheng-org/sdk-h5-adapter-vue";
 
-sdkH5.init({ appName: "demo-vue", endpoints: { loki: "/loki/api/v1/push" } });
+sdkH5.init({ 
+  appName: "demo-vue", 
+  endpoints: { loki: "/loki/api/v1/push" } 
+});
 installAutoCapture(sdkH5);
 
 const app = createApp(App);
@@ -66,12 +80,189 @@ app.use(createSdkVuePlugin(sdkH5));
 app.mount("#app");
 ```
 
+### React Native
 
-## 前置要求
-- Loki 需暴露 `/loki/api/v1/push`，并开启 CORS；或通过网关/代理处理 CORS 与鉴权。
-- 生产环境建议在 Loki 前增加网关（如 Nginx/Envoy/API GW）统一管理 CORS、鉴权与限流。
+```typescript
+import { sdkH5 } from '@ppyuesheng-org/sdk-h5-core';
+import { installRnGlobalHandlers } from '@ppyuesheng-org/sdk-h5-adapter-rn';
 
-## CORS 跨域解决方案
+sdkH5.init({
+  appName: 'my-rn-app',
+  endpoints: { loki: 'https://your-api.com/loki/api/v1/push' },
+  useProxy: false
+});
+
+installRnGlobalHandlers(sdkH5);
+```
+
+## 🎯 核心功能
+
+### 自动错误捕获
+
+```typescript
+// 安装自动错误捕获
+installAutoCapture(sdkH5);
+
+// 自动捕获以下错误类型：
+// ✅ JavaScript运行时错误
+// ✅ 未处理的Promise拒绝  
+// ✅ 资源加载失败
+// ✅ Vue组件错误（需适配器）
+// ✅ React组件错误（需适配器）
+// - JavaScript运行时错误
+// - 未处理的Promise拒绝
+// - 资源加载错误（图片、脚本等）
+```
+
+### 手动日志记录
+
+```typescript
+// 记录不同级别的日志
+sdkH5.log('info', '用户登录', { userId: '123', method: 'password' });
+sdkH5.log('warn', 'API响应慢', { endpoint: '/api/users', duration: 5000 });
+sdkH5.log('error', '支付失败', { orderId: '456', reason: 'insufficient_funds' });
+
+// 手动捕获错误
+try {
+  // 一些可能出错的操作
+} catch (error) {
+  sdkH5.captureError(error, { context: 'payment_process' });
+}
+```
+
+### 上下文管理
+
+```typescript
+// 设置用户信息
+sdkH5.setUser('user-123');
+
+// 更新全局上下文
+sdkH5.setContext({
+  app: { version: '1.2.3' },
+  user: { sessionId: 'session-456' }
+});
+```
+
+## 📦 包结构
+
+| 包名 | 功能 | 大小 |
+|------|------|------|
+| `@ppyuesheng-org/sdk-h5-core` | 核心SDK功能 | ~10KB |
+| `@ppyuesheng-org/sdk-h5-transport-loki` | Loki传输层 | ~3KB |
+| `@ppyuesheng-org/sdk-h5-adapter-js` | 原生JS适配器 | ~1KB |
+| `@ppyuesheng-org/sdk-h5-adapter-vue` | Vue.js适配器 | ~1KB |
+| `@ppyuesheng-org/sdk-h5-adapter-rn` | React Native适配器 | ~1KB |
+
+## 🔧 配置选项
+
+### 核心配置
+```typescript
+interface SdkH5Config {
+  appName: string;                    // 必需：应用名称
+  environment?: 'dev' | 'prod';       // 环境
+  endpoints: {
+    loki: string;                     // Loki 推送端点
+  };
+  useProxy?: boolean;                 // 启用代理模式
+  proxyPath?: string;                 // 代理路径前缀
+  corsMode?: 'cors' | 'same-origin';  // CORS 模式
+  useSendBeacon?: boolean;            // 使用 sendBeacon 进行最终刷新
+  enableOfflineBuffer?: boolean;      // 启用离线缓冲
+  sampleRate?: number;                // 采样率 (0-1)
+  rateLimitPerMin?: number;           // 速率限制
+  flushIntervalMs?: number;           // 刷新间隔
+  maxRetries?: number;                // 最大重试次数
+  onError?: (error: Error) => void;   // 错误回调
+}
+```
+
+### 高级配置
+```typescript
+sdkH5.init({
+  appName: "my-app",
+  environment: "prod",
+  endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
+  
+  // 可靠性设置
+  useSendBeacon: true,
+  enableOfflineBuffer: true,
+  maxRetries: 3,
+  
+  // 性能设置
+  sampleRate: 1.0,
+  rateLimitPerMin: 1000,
+  flushIntervalMs: 5000,
+  
+  // 错误处理
+  onError: (err) => console.error('SDK Error:', err)
+});
+```
+
+## API 参考
+
+### 核心方法
+
+#### `sdkH5.init(config)`
+使用配置初始化 SDK。
+
+#### `sdkH5.log(level, message, attributes?, title?)`
+发送手动日志条目。
+```typescript
+sdkH5.log('info', '用户操作', { action: 'click_button', userId: '123' });
+sdkH5.log('error', 'API 调用失败', { endpoint: '/api/users', status: 500 });
+```
+
+#### `sdkH5.captureError(error, attributes?, title?)`
+手动捕获错误。
+```typescript
+try {
+  // 一些有风险的操作
+} catch (error) {
+  sdkH5.captureError(error, { context: 'user_login' }, '登录失败');
+}
+```
+
+#### `sdkH5.setUser(userId?)`
+为所有后续日志设置当前用户 ID。
+```typescript
+sdkH5.setUser('user-123');
+```
+
+#### `sdkH5.setContext(context)`
+更新所有后续日志的全局上下文。
+```typescript
+sdkH5.setContext({
+  app: { version: '1.2.3' },
+  user: { sessionId: 'session-456' }
+});
+```
+
+#### `sdkH5.flush()`
+手动刷新当前队列。
+```typescript
+await sdkH5.flush();
+```
+
+#### `sdkH5.shutdown()`
+优雅地关闭 SDK。
+```typescript
+await sdkH5.shutdown();
+```
+
+### 自动捕获
+
+#### `installAutoCapture(sdk?)`
+安装自动错误捕获，包括：
+- JavaScript 错误
+- 未处理的 Promise 拒绝
+- 资源加载错误
+
+```typescript
+import { installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
+installAutoCapture(sdkH5);
+```
+
+## 🌐 CORS 跨域解决方案
 
 如果遇到连接 Loki 时的 CORS 跨域错误，请参考 [CORS-SOLUTIONS.md](./CORS-SOLUTIONS.md) 获取详细解决方案，包括：
 
@@ -82,8 +273,8 @@ app.mount("#app");
 
 ### 快速解决 - 代理模式
 
-```ts
-import { sdkH5, installAutoCapture } from "@sdk-h5/core";
+```typescript
+import { sdkH5, installAutoCapture } from "@ppyuesheng-org/sdk-h5-core";
 
 sdkH5.init({
   appName: "demo-h5",
@@ -98,263 +289,87 @@ installAutoCapture(sdkH5);
 
 配置你的服务器将 `/api/loki/*` 代理到实际的 Loki 实例。
 
+### 代理模式配置
+推荐使用代理模式避免CORS问题，需要在服务器配置代理：
 
-## 数据模型（写入 Loki 的 JSON 行）
-- 每条记录的 envelope（作为字符串写入 Loki `streams.values[][1]`）：
+```nginx
+location /api/loki/ {
+    rewrite ^/api/loki/(.*) /$1 break;
+    proxy_pass http://your-loki-server:3100;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+## 数据模型
+
+每个日志条目都作为 JSON 信封发送到 Loki：
+
 ```json
 {
   "timestampNs": "1700000000000000000",
   "level": "error",
   "type": "js_error",
-  "message": "ReferenceError: foo is not defined",
-  "stack": "Error: ...",
-  "attributes": {"origin":"window.onerror"},
+  "message": "TypeError: Cannot read property 'x' of undefined",
+  "attributes": {
+    "error": {
+      "name": "TypeError",
+      "message": "Cannot read property 'x' of undefined",
+      "stack": "TypeError: Cannot read property 'x' of undefined\n    at ..."
+    },
+    "context": "user_login"
+  },
   "context": {
-    "app": {"name":"demo-h5","version":"1.0.0","env":"staging","release":"1.0.0+001"},
-    "user": {"id":"u-123","sessionId":"s-456"},
-    "page": {"url":"https://example.com/x","path":"/x","referrer":""},
-    "device": {"ua":"...","platform":"web","language":"zh-CN","viewport":"1920x1080","dpi":2}
-  }
-}
-```
-
-- Loki 流标签（客户端尽量精简）：
-  - `app`、`env`、`platform`、`release`、`sdk`（如 `sdk-h5@1.0.0`）
-
-- SDK 发送的 Loki Push 示例：
-```json
-{
-  "streams": [
-    {
-      "stream": {"app":"demo-h5","env":"staging","platform":"web","release":"1.0.0","sdk":"sdk-h5@1.0.0"},
-      "values": [["1700000000000000000", "{\"level\":\"error\",\"message\":\"...\"}"]]
-    }
-  ]
-}
-```
-
-
-## 公共 API（TypeScript）
-```ts
-type LogLevel = "debug" | "info" | "warn" | "error";
-
-type SdkH5Config = {
-  appName: string;
-  appVersion?: string;
-  release?: string;
-  environment?: "dev" | "test" | "staging" | "prod";
-  endpoints: { loki: string };
-  headers?: Record<string, string>;
-  transport?: "loki"; // 目前仅 loki，预留扩展
-  batchMaxBytes?: number;      // 默认 512*1024
-  batchMaxRecords?: number;    // 默认 100
-  flushIntervalMs?: number;    // 默认 2000
-  maxRetries?: number;         // 默认 3
-  backoffMs?: number;          // 默认 1000
-  useSendBeacon?: boolean;     // 默认 true
-  enableOfflineBuffer?: boolean; // 默认 true（localStorage）
-  sampleRate?: number;         // 默认 1
-  rateLimitPerMin?: number;    // 默认 300
-  redact?: {
-    urlQuery?: boolean;        // 默认 true
-    headers?: string[];        // 例如 ["authorization", "cookie"]
-    custom?: (envelope: LogEnvelope) => LogEnvelope | null;
-  };
-  onError?: (err: Error) => void;
-};
-
-interface SdkH5 {
-  init(config: SdkH5Config): void;
-  installAutoCapture(): void; // 适配器快捷安装
-  captureError(error: unknown, attributes?: Record<string, any>, title?: string): void;
-  log(level: LogLevel, message: string, attributes?: Record<string, any>, title?: string): void;
-  setUser(userId?: string): void;
-  setContext(context: Partial<LogEnvelope["context"]>): void;
-  flush(): Promise<void>;
-  shutdown(): Promise<void>;
-}
-```
-
-
-## 新增功能
-
-### 日志标题支持
-可以为每条日志添加可选的标题，便于在日志系统中快速识别和分类：
-
-```js
-// 带标题的日志记录
-sdkH5.log("info", "用户登录成功", { userId: "12345" }, "用户认证");
-sdkH5.log("warn", "API响应缓慢", { duration: 3000 }, "性能警告");
-
-// 带标题的错误捕获
-sdkH5.captureError(error, { component: "PaymentForm" }, "支付异常");
-```
-
-### 浏览器类型自动检测
-SDK会自动检测并记录用户的浏览器类型，支持：
-- `chrome` - Google Chrome
-- `firefox` - Mozilla Firefox  
-- `safari` - Apple Safari
-- `edge` - Microsoft Edge
-- `opera` - Opera
-- `ie` - Internet Explorer
-- `unknown` - 无法识别的浏览器
-
-浏览器信息会自动添加到设备上下文中：
-```json
-{
-  "context": {
+    "app": {
+      "name": "demo-h5",
+      "version": "1.0.0",
+      "env": "staging"
+    },
+    "user": {
+      "id": "user-123",
+      "sessionId": "session-456"
+    },
+    "page": {
+      "url": "https://example.com/login",
+      "path": "/login",
+      "referrer": "https://example.com/"
+    },
     "device": {
-      "browser": "chrome",
-      "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36...",
-      "platform": "web"
+      "ua": "Mozilla/5.0...",
+      "platform": "web",
+      "language": "zh-CN",
+      "viewport": "1920x1080"
     }
   }
 }
 ```
 
-## 自动采集行为
-- `window.onerror`：捕获未处理运行时错误
-- `window.onunhandledrejection`：捕获未处理 Promise 拒绝
-- 资源错误：`addEventListener('error', ..., true)` 捕获 `<img>/<script>/<link>` 加载错误
-- Vue 插件：接入 `app.config.errorHandler`（Vue 3）或 `Vue.config.errorHandler`（Vue 2）
-- 可选：console 面包屑（默认关闭）
+## 🔒 安全与隐私
 
+- 建议在 Loki 前放置网关以集中管理 CORS/认证/限流
+- 默认脱敏敏感头信息（`authorization`、`cookie` 等）和 URL 查询参数
+- 除非绝对必要，否则避免发送 PII；使用 `redact.custom` 删除或转换
+- 默认脱敏敏感头信息（`authorization`、`cookie`等）
+- 支持自定义数据过滤和转换
+- 避免发送PII（个人身份信息）
+- 建议在生产环境使用代理网关
 
-## 最小化默认配置
-- `flushIntervalMs`：2000 ms
-- `batchMaxRecords`：100；`batchMaxBytes`：512 KB
-- `maxRetries`：3（指数退避，`backoffMs`=1000 + 抖动）
-- `useSendBeacon`：true（页面卸载时优先）；若不可用则回退同步 `fetch`
-- `enableOfflineBuffer`：true（localStorage 小型环形缓冲）
-- `sampleRate`：1（对高频事件建议 < 1）；`rateLimitPerMin`：300
-- 脱敏：默认移除 URL 查询串；按配置剔除敏感头；提供自定义过滤
+## Demo
 
+查看 [demo](./demo/h5/) 获取完整的工作示例，包括：
+- 错误触发按钮
+- 实时日志查看
+- 配置示例
 
-## 传输细节（直连 Loki）
-- Endpoint：`POST {loki}/loki/api/v1/push`
-- Content-Type：`application/json`
-- Body：Loki Push 负载（见上）
-- 时间戳：纳秒字符串
-- `keepalive`：`fetch(..., { keepalive: true })` 支持页面卸载时仍可上报
-- 生命周期事件：`visibilitychange`/`pagehide`/`beforeunload` 尝试 `navigator.sendBeacon` 最终冲刷
-- 重试：对 5xx/429 指数退避重试；对 4xx（除 429）不重试
-- CORS：需允许浏览器域；或通过网关代理
+## 🛠️ 故障排除
 
+- **4xx 错误**：检查 Loki/网关的 CORS 和认证
+- **429/5xx**：SDK 会进行退避重试；考虑降低采样率或增加网关限制
+- **Grafana 中没有日志**：验证 Loki 标签匹配查询（`{app="demo-h5"}`）和时间范围
+- **4xx错误**: 检查CORS和认证配置
+- **429/5xx错误**: SDK会自动重试，可调整采样率
+- **无日志显示**: 检查Loki查询标签和时间范围
 
-## 核心伪代码
-```ts
-class SdkH5Impl implements SdkH5 {
-  private cfg!: SdkH5Config;
-  private queue: LogEnvelope[] = [];
-  private timer: number | undefined;
-  private context: GlobalContext;
-  private limiter: RateLimiter;
+## 📄 许可证
 
-  init(cfg: SdkH5Config) {
-    this.cfg = withDefaults(cfg);
-    this.context = buildInitialContext(cfg);
-    this.limiter = new RateLimiter(this.cfg.rateLimitPerMin);
-    this.timer = window.setInterval(() => this.flush(), this.cfg.flushIntervalMs);
-    if (this.cfg.enableOfflineBuffer) restoreFromStorage(this.queue);
-    bindLifecycleEvents(() => this.flush());
-  }
-
-  installAutoCapture() { installAutoCapture(this); }
-
-  captureError(error: unknown, attributes?: Record<string, any>, title?: string) {
-    if (!sample(this.cfg.sampleRate)) return;
-    const env = buildErrorEnvelope(error, this.context, attributes, title);
-    this.enqueue(env);
-  }
-
-  log(level: LogLevel, message: string, attributes?: Record<string, any>, title?: string) {
-    const env = buildLogEnvelope(level, message, this.context, attributes, title);
-    this.enqueue(env);
-  }
-
-  private enqueue(env: LogEnvelope) {
-    const filtered = applyRedaction(env, this.cfg.redact);
-    if (!filtered) return;
-    if (!this.limiter.allow()) return;
-    this.queue.push(filtered);
-    if (shouldFlush(this.queue, this.cfg)) this.flush();
-    if (this.cfg.enableOfflineBuffer) persistToStorage(this.queue);
-  }
-
-  async flush() {
-    const batch = drainBatch(this.queue, this.cfg);
-    if (batch.length === 0) return;
-    const payload = toLokiPayload(batch, this.context, this.cfg);
-    try {
-      await retry(() => httpPost(this.cfg.endpoints.loki, payload, this.cfg), this.cfg.maxRetries, this.cfg.backoffMs);
-    } catch (err) {
-      this.cfg.onError?.(err as Error);
-      // 可选：若启用存储，可将批处理头部回灌队列
-    }
-  }
-
-  async shutdown() {
-    window.clearInterval(this.timer);
-    await this.flush();
-  }
-}
-```
-
-
-## Vue 插件伪代码
-```ts
-export function createSdkVuePlugin(sdk: SdkH5) {
-  return {
-    install(app) {
-      const prev = app.config.errorHandler;
-      app.config.errorHandler = (err, instance, info) => {
-        sdk.captureError(err, { vueInfo: info });
-        prev?.(err, instance, info);
-      };
-      app.provide("$sdkH5", sdk);
-    }
-  };
-}
-```
-
-
-## RN 全局错误伪代码（可选）
-```ts
-export function installRnGlobalHandlers(sdk: SdkH5) {
-  const prev = (global as any).ErrorUtils?.getGlobalHandler?.();
-  (global as any).ErrorUtils?.setGlobalHandler?.((error: any, isFatal: boolean) => {
-    sdk.captureError(error, { rnIsFatal: isFatal });
-    prev?.(error, isFatal);
-  });
-}
-```
-
-
-## 安全与隐私
-- 推荐在 Loki 前设置网关，集中处理 CORS/鉴权/限流。
-- 默认脱敏 URL 查询串；可配置移除敏感头（`authorization`、`cookie` 等）。
-- 尽量避免传输 PII；如需，可通过 `redact.custom` 做二次过滤或直接丢弃。
-
-
-## Demo 应用（计划）
-- 简单 H5 页：按钮触发以下场景
-  - 抛出 JS 错误
-  - 未处理 Promise 拒绝
-  - 加载不存在图片（资源错误）
-  - 自定义 info 日志
-- 通过查询串/环境变量配置 Loki endpoint
-- 展示页面关闭时的最终 flush 行为
-
-
-## 路线图
-- IndexedDB 大容量离线缓冲
-- 面包屑（console/XHR/fetch）开关
-- OTLP/HTTP（可选）经 Collector 转发到 Loki
-- Source maps 集成（服务端符号化）
-
-
-## 故障排查
-- 4xx：检查 CORS 与鉴权（Loki/网关）
-- 429/5xx：SDK 会退避重试；考虑降低采样率或放宽限流
-- Grafana 无日志：确认查询标签（如 `{app="demo-h5"}`）与时间范围是否正确
+MIT License - 详见 [LICENSE](./LICENSE) 文件
