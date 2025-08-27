@@ -1,0 +1,18 @@
+{
+  "name": "sdk-h5",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:umd": "pnpm --filter @chenpingfromgxu/sdk-h5-core build:umd",
+    "clean": "rimraf packages/*/dist"
+  },
+  "devDependencies": {
+    "tsup": "^7.2.0",
+    "typescript": "^5.6.3",
+    "rimraf": "^5.0.5"
+  }
+}

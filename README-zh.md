@@ -1,17 +1,17 @@
-# sdk-h5: Minimal Frontend Error & Log SDK for Loki (Direct Push)
+# sdk-h5：前端错误与日志采集 SDK（直连 Loki）
 
-A lightweight, easy-to-integrate SDK for H5/Web (with Vue adapter and RN stub) that automatically captures common frontend errors and allows simple manual logging, sending them directly to Loki's `/loki/api/v1/push` endpoint.
+一个轻量、易接入的 H5/Web SDK（包含 Vue 适配器与 RN 基础支持），用于自动捕获常见前端错误，同时提供简单的手动日志能力，将数据直接推送到 Loki 的 `/loki/api/v1/push` 接口。
 
-- Simple integration: one `init`, optional `installAutoCapture`, minimal config
-- Auto capture: JS errors, unhandled promise rejections, resource load errors; Vue plugin
-- Manual logging: `log()` and `captureError()`
-- Reliable delivery: small queue + batch + retry + sendBeacon on unload
-- Privacy controls: basic redaction hooks
+- 简单接入：一次 `init`，可选 `installAutoCapture`，最小配置
+- 自动采集：JS 全局错误、未处理 Promise 拒绝、资源加载错误；Vue 插件
+- 手动日志：`log()` 与 `captureError()`
+- 可靠传输：小队列 + 批量 + 重试 + 页面卸载时 sendBeacon
+- 隐私控制：基础脱敏钩子
 
 
-## TL;DR Quickstart
+## 快速开始（TL;DR）
 
-### CDN/UMD (Vanilla JS)
+### CDN/UMD（原生 JS）
 ```html
 <script src="/path/to/sdk-h5.umd.js"></script>
 <script>
@@ -19,18 +19,18 @@ A lightweight, easy-to-integrate SDK for H5/Web (with Vue adapter and RN stub) t
     appName: "demo-h5",
     environment: "staging",
     endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
-    transport: "loki", // default
+    transport: "loki", // 默认
     useSendBeacon: true,
     enableOfflineBuffer: true,
   });
   sdkH5.installAutoCapture();
 
-  // manual logs
+  // 手动日志
   sdkH5.log("info", "page_loaded", { path: location.pathname });
 </script>
 ```
 
-### NPM (ESM)
+### NPM（ESM）
 ```ts
 import { sdkH5 } from "@sdk-h5/core";
 import { installAutoCapture } from "@sdk-h5/adapter-js";
@@ -59,28 +59,28 @@ app.mount("#app");
 ```
 
 
-## Requirements
-- Loki exposes `/loki/api/v1/push` with CORS enabled, or is proxied via a gateway that handles CORS and authentication.
-- For production, a reverse proxy (e.g., Nginx/Envoy/API GW) is recommended to manage CORS, auth, and rate limits.
+## 前置要求
+- Loki 需暴露 `/loki/api/v1/push`，并开启 CORS；或通过网关/代理处理 CORS 与鉴权。
+- 生产环境建议在 Loki 前增加网关（如 Nginx/Envoy/API GW）统一管理 CORS、鉴权与限流。
 
-## CORS Solutions
+## CORS 跨域解决方案
 
-If you encounter CORS errors when connecting to Loki, see [CORS-SOLUTIONS.md](./CORS-SOLUTIONS.md) for detailed solutions including:
+如果遇到连接 Loki 时的 CORS 跨域错误，请参考 [CORS-SOLUTIONS.md](./CORS-SOLUTIONS.md) 获取详细解决方案，包括：
 
-- **Nginx reverse proxy** (recommended for production)
-- **SDK proxy mode** configuration
-- **Vite dev proxy** for development
-- **Express/Node.js proxy** setup
+- **Nginx 反向代理**（生产环境推荐）
+- **SDK 代理模式**配置
+- **Vite 开发代理**设置
+- **Express/Node.js 代理**配置
 
-### Quick Fix - Proxy Mode
+### 快速解决 - 代理模式
 
 ```ts
 import { sdkH5, installAutoCapture } from "@sdk-h5/core";
 
 sdkH5.init({
   appName: "demo-h5",
-  endpoints: { loki: "unused-in-proxy-mode" },
-  // Enable proxy mode to avoid CORS
+  endpoints: { loki: "代理模式下不使用" },
+  // 启用代理模式避免 CORS 问题
   useProxy: true,
   proxyPath: "/api/loki",
   corsMode: "same-origin"
@@ -88,11 +88,11 @@ sdkH5.init({
 installAutoCapture(sdkH5);
 ```
 
-Configure your server to proxy `/api/loki/*` to your actual Loki instance.
+配置你的服务器将 `/api/loki/*` 代理到实际的 Loki 实例。
 
 
-## Data Model (JSON line inside Loki values)
-- Envelope per record (serialized as a JSON string in Loki `streams.values[][1]`):
+## 数据模型（写入 Loki 的 JSON 行）
+- 每条记录的 envelope（作为字符串写入 Loki `streams.values[][1]`）：
 ```json
 {
   "timestampNs": "1700000000000000000",
@@ -110,10 +110,10 @@ Configure your server to proxy `/api/loki/*` to your actual Loki instance.
 }
 ```
 
-- Loki stream labels (kept small on client):
-  - `app`, `env`, `platform`, `release`, `sdk` (e.g., `sdk-h5@1.0.0`)
+- Loki 流标签（客户端尽量精简）：
+  - `app`、`env`、`platform`、`release`、`sdk`（如 `sdk-h5@1.0.0`）
 
-- Example Loki Push payload sent by SDK:
+- SDK 发送的 Loki Push 示例：
 ```json
 {
   "streams": [
@@ -126,7 +126,7 @@ Configure your server to proxy `/api/loki/*` to your actual Loki instance.
 ```
 
 
-## Public API (TypeScript)
+## 公共 API（TypeScript）
 ```ts
 type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -137,19 +137,19 @@ type SdkH5Config = {
   environment?: "dev" | "test" | "staging" | "prod";
   endpoints: { loki: string };
   headers?: Record<string, string>;
-  transport?: "loki"; // fixed for now, reserved for future
-  batchMaxBytes?: number;      // default 512*1024
-  batchMaxRecords?: number;    // default 100
-  flushIntervalMs?: number;    // default 2000
-  maxRetries?: number;         // default 3
-  backoffMs?: number;          // default 1000
-  useSendBeacon?: boolean;     // default true
-  enableOfflineBuffer?: boolean; // default true (localStorage)
-  sampleRate?: number;         // default 1
-  rateLimitPerMin?: number;    // default 300
+  transport?: "loki"; // 目前仅 loki，预留扩展
+  batchMaxBytes?: number;      // 默认 512*1024
+  batchMaxRecords?: number;    // 默认 100
+  flushIntervalMs?: number;    // 默认 2000
+  maxRetries?: number;         // 默认 3
+  backoffMs?: number;          // 默认 1000
+  useSendBeacon?: boolean;     // 默认 true
+  enableOfflineBuffer?: boolean; // 默认 true（localStorage）
+  sampleRate?: number;         // 默认 1
+  rateLimitPerMin?: number;    // 默认 300
   redact?: {
-    urlQuery?: boolean;        // default true
-    headers?: string[];        // e.g., ["authorization", "cookie"]
+    urlQuery?: boolean;        // 默认 true
+    headers?: string[];        // 例如 ["authorization", "cookie"]
     custom?: (envelope: LogEnvelope) => LogEnvelope | null;
   };
   onError?: (err: Error) => void;
@@ -157,7 +157,7 @@ type SdkH5Config = {
 
 interface SdkH5 {
   init(config: SdkH5Config): void;
-  installAutoCapture(): void; // shorthand for adapter-js auto handlers
+  installAutoCapture(): void; // 适配器快捷安装
   captureError(error: unknown, attributes?: Record<string, any>): void;
   log(level: LogLevel, message: string, attributes?: Record<string, any>): void;
   setUser(userId?: string): void;
@@ -168,36 +168,36 @@ interface SdkH5 {
 ```
 
 
-## Auto-Capture Behavior
-- `window.onerror`: capture uncaught runtime errors
-- `window.onunhandledrejection`: capture unhandled promise rejections
-- Resource errors: `addEventListener('error', ..., true)` captures `<img>/<script>/<link>` load errors
-- Vue plugin: hooks `app.config.errorHandler` (Vue 3) or `Vue.config.errorHandler` (Vue 2)
-- Optional: console breadcrumb hooking (disabled by default)
+## 自动采集行为
+- `window.onerror`：捕获未处理运行时错误
+- `window.onunhandledrejection`：捕获未处理 Promise 拒绝
+- 资源错误：`addEventListener('error', ..., true)` 捕获 `<img>/<script>/<link>` 加载错误
+- Vue 插件：接入 `app.config.errorHandler`（Vue 3）或 `Vue.config.errorHandler`（Vue 2）
+- 可选：console 面包屑（默认关闭）
 
 
-## Minimal Configuration Defaults
-- `flushIntervalMs`: 2000 ms
-- `batchMaxRecords`: 100; `batchMaxBytes`: 512 KB
-- `maxRetries`: 3 with exponential backoff (`backoffMs`=1000 + jitter)
-- `useSendBeacon`: true (used on page unload); fallback to sync `fetch` if not available
-- `enableOfflineBuffer`: true (localStorage, small ring buffer)
-- `sampleRate`: 1 (set < 1 for high-volume types); `rateLimitPerMin`: 300
-- Redaction: remove URL query by default; strip configured headers; optional custom filter
+## 最小化默认配置
+- `flushIntervalMs`：2000 ms
+- `batchMaxRecords`：100；`batchMaxBytes`：512 KB
+- `maxRetries`：3（指数退避，`backoffMs`=1000 + 抖动）
+- `useSendBeacon`：true（页面卸载时优先）；若不可用则回退同步 `fetch`
+- `enableOfflineBuffer`：true（localStorage 小型环形缓冲）
+- `sampleRate`：1（对高频事件建议 < 1）；`rateLimitPerMin`：300
+- 脱敏：默认移除 URL 查询串；按配置剔除敏感头；提供自定义过滤
 
 
-## Transport Details (Direct to Loki)
-- Endpoint: `POST {loki}/loki/api/v1/push`
-- Content-Type: `application/json`
-- Request body: Loki Push payload (see above)
-- Timestamp: nanoseconds as string
-- Keepalive: `fetch(..., { keepalive: true })` to work with page unload
-- On `visibilitychange`/`pagehide`/`beforeunload`: try `navigator.sendBeacon` for final flush
-- Retries: on 5xx/429 with exponential backoff; do not retry on 4xx (except 429)
-- CORS: Loki must allow browser origin (or place a gateway/proxy in front)
+## 传输细节（直连 Loki）
+- Endpoint：`POST {loki}/loki/api/v1/push`
+- Content-Type：`application/json`
+- Body：Loki Push 负载（见上）
+- 时间戳：纳秒字符串
+- `keepalive`：`fetch(..., { keepalive: true })` 支持页面卸载时仍可上报
+- 生命周期事件：`visibilitychange`/`pagehide`/`beforeunload` 尝试 `navigator.sendBeacon` 最终冲刷
+- 重试：对 5xx/429 指数退避重试；对 4xx（除 429）不重试
+- CORS：需允许浏览器域；或通过网关代理
 
 
-## Pseudocode (Core)
+## 核心伪代码
 ```ts
 class SdkH5Impl implements SdkH5 {
   private cfg!: SdkH5Config;
@@ -245,7 +245,7 @@ class SdkH5Impl implements SdkH5 {
       await retry(() => httpPost(this.cfg.endpoints.loki, payload, this.cfg), this.cfg.maxRetries, this.cfg.backoffMs);
     } catch (err) {
       this.cfg.onError?.(err as Error);
-      // optional: requeue head if storage enabled
+      // 可选：若启用存储，可将批处理头部回灌队列
     }
   }
 
@@ -257,7 +257,7 @@ class SdkH5Impl implements SdkH5 {
 ```
 
 
-## Vue Plugin Pseudocode
+## Vue 插件伪代码
 ```ts
 export function createSdkVuePlugin(sdk: SdkH5) {
   return {
@@ -274,7 +274,7 @@ export function createSdkVuePlugin(sdk: SdkH5) {
 ```
 
 
-## RN Stub Pseudocode (Optional)
+## RN 全局错误伪代码（可选）
 ```ts
 export function installRnGlobalHandlers(sdk: SdkH5) {
   const prev = (global as any).ErrorUtils?.getGlobalHandler?.();
@@ -286,30 +286,30 @@ export function installRnGlobalHandlers(sdk: SdkH5) {
 ```
 
 
-## Security & Privacy
-- Prefer proxying Loki behind a gateway to centralize CORS/auth/rate-limit.
-- Redact sensitive headers (`authorization`, `cookie`, etc.) and URL query by default.
-- Avoid sending PII unless absolutely necessary; use `redact.custom` to drop or transform.
+## 安全与隐私
+- 推荐在 Loki 前设置网关，集中处理 CORS/鉴权/限流。
+- 默认脱敏 URL 查询串；可配置移除敏感头（`authorization`、`cookie` 等）。
+- 尽量避免传输 PII；如需，可通过 `redact.custom` 做二次过滤或直接丢弃。
 
 
-## Demo App (Plan)
-- Simple H5 page with buttons to trigger:
-  - Throw JS error
-  - Unhandled promise rejection
-  - Load a missing image (resource error)
-  - Custom info log
-- Configurable endpoint via query string/env
-- Demonstrate final flush on page close
+## Demo 应用（计划）
+- 简单 H5 页：按钮触发以下场景
+  - 抛出 JS 错误
+  - 未处理 Promise 拒绝
+  - 加载不存在图片（资源错误）
+  - 自定义 info 日志
+- 通过查询串/环境变量配置 Loki endpoint
+- 展示页面关闭时的最终 flush 行为
 
 
-## Roadmap
-- IndexedDB offline spool for larger volumes
-- Breadcrumbs (console/XHR/fetch) toggle
-- OTLP/HTTP transport (optional) via Collector
-- Source maps integration for stack trace symbolication (server-side)
+## 路线图
+- IndexedDB 大容量离线缓冲
+- 面包屑（console/XHR/fetch）开关
+- OTLP/HTTP（可选）经 Collector 转发到 Loki
+- Source maps 集成（服务端符号化）
 
 
-## Troubleshooting
-- 4xx errors: check CORS and auth at Loki/gateway
-- 429/5xx: SDK retries with backoff; consider reducing sample rate or increasing gateway limits
-- No logs in Grafana: verify Loki labels match queries (`{app="demo-h5"}`) and time range
+## 故障排查
+- 4xx：检查 CORS 与鉴权（Loki/网关）
+- 429/5xx：SDK 会退避重试；考虑降低采样率或放宽限流
+- Grafana 无日志：确认查询标签（如 `{app="demo-h5"}`）与时间范围是否正确

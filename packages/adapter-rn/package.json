@@ -1,0 +1,36 @@
+{
+  "name": "@chenpingfromgxu/sdk-h5-adapter-rn",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chenpingfromgxu/py-gitea.git",
+    "directory": "sdk-h5/packages/adapter-rn"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.64"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "tsup": "^7.2.0"
+  }
+}
