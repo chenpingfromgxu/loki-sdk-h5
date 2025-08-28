@@ -1,6 +1,6 @@
 {
-  "name": "@ppyuesheng-org/sdk-h5-core",
-  "version": "0.1.0",
+  "name": "@ppyuesheng/sdk-h5-core",
+  "version": "0.1.1",
   "description": "H5 SDK核心包 - 提供日志收集和上报功能",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,15 +23,12 @@
     "loki",
     "typescript"
   ],
-  "author": "ppyuesheng-org",
+  "author": "ppyuesheng",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ppyuesheng-org/py-gitea.git",
+    "url": "git+https://github.com/ppyuesheng/py-gitea.git",
     "directory": "sdk-h5/packages/core"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "tsup",
@@ -39,7 +36,7 @@
     "dev": "tsup --watch"
   },
   "dependencies": {
-    "@ppyuesheng-org/sdk-h5-transport-loki": "workspace:*"
+    "@ppyuesheng/sdk-h5-transport-loki": "^0.1.1"
   },
   "devDependencies": {
     "tsup": "^7.2.0",

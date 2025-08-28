@@ -1,5 +1,5 @@
-import { SdkH5Config, LogEnvelope } from '@ppyuesheng-org/sdk-h5-transport-loki';
-export { LogEnvelope, SdkH5Config } from '@ppyuesheng-org/sdk-h5-transport-loki';
+import { SdkH5Config, LogEnvelope } from '@ppyuesheng/sdk-h5-transport-loki';
+export { LogEnvelope, SdkH5Config } from '@ppyuesheng/sdk-h5-transport-loki';
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 type GlobalContext = {

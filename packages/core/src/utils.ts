@@ -1,4 +1,4 @@
-import type { LogEnvelope, SdkH5Config } from '@ppyuesheng-org/sdk-h5-transport-loki';
+import type { LogEnvelope, SdkH5Config } from '@ppyuesheng/sdk-h5-transport-loki';
 import type { GlobalContext } from './types.js';
 
 export class RateLimiter {

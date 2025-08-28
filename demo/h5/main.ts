@@ -1,4 +1,4 @@
-import { sdkH5, installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng/sdk-h5-core';
 
 // 使用代理模式避免CORS问题
 // 开发环境通过Vite代理，生产环境通过Nginx代理

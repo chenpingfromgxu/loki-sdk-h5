@@ -9,10 +9,10 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
-    "@ppyuesheng-org/sdk-h5-core": "latest"
+    "@ppyuesheng/sdk-h5-core": "^0.1.1"
   },
   "devDependencies": {
-    "vite": "^5.4.8",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vite": "^5.4.8"
   }
 }
