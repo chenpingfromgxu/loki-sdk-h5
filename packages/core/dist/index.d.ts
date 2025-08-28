@@ -1,5 +1,5 @@
-import { SdkH5Config, LogEnvelope } from '@ppyuesheng/sdk-h5-transport-loki';
-export { LogEnvelope, SdkH5Config } from '@ppyuesheng/sdk-h5-transport-loki';
+import { SdkH5Config, LogEnvelope } from '@ppyuesheng/loki-sdk-h5-transport-loki';
+export { LogEnvelope, SdkH5Config } from '@ppyuesheng/loki-sdk-h5-transport-loki';
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 type GlobalContext = {
@@ -66,4 +66,4 @@ declare class SdkH5Impl implements SdkH5 {
 declare const sdkH5: SdkH5Impl;
 declare function installAutoCapture(sdk?: SdkH5Impl): void;
 
-export { type GlobalContext, type LogLevel, type SdkH5, SdkH5Impl, buildErrorEnvelope, buildLogEnvelope, detectBrowser, generateSessionId, installAutoCapture, sdkH5 };
+export { GlobalContext, LogLevel, SdkH5, SdkH5Impl, buildErrorEnvelope, buildLogEnvelope, detectBrowser, generateSessionId, installAutoCapture, sdkH5 };

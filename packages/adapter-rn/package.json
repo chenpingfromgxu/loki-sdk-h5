@@ -1,5 +1,8 @@
 {
-  "name": "@ppyuesheng/sdk-h5-adapter-rn",
+  "name": "@ppyuesheng/loki-sdk-h5-adapter-rn",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "0.1.1",
   "description": "H5 SDK React Native适配器 - 为React Native应用提供日志收集集成",
   "type": "module",

@@ -1,5 +1,8 @@
 {
-  "name": "@ppyuesheng/sdk-h5-adapter-js",
+  "name": "@ppyuesheng/loki-sdk-h5-adapter-js",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "0.1.1",
   "description": "H5 SDK JavaScript适配器 - 为普通JS应用提供日志收集集成",
   "type": "module",

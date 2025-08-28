@@ -31,18 +31,18 @@ A lightweight, easy-to-integrate H5/Web SDK (with Vue adapter and RN basic suppo
 
 ```bash
 # Install core package
-npm install @ppyuesheng/sdk-h5-core
+npm install @ppyuesheng/loki-sdk-h5-core
 
 # Install adapters as needed
-npm install @ppyuesheng/sdk-h5-adapter-vue    # Vue applications
-npm install @ppyuesheng/sdk-h5-adapter-js     # Plain JS applications
-npm install @ppyuesheng/sdk-h5-adapter-rn     # React Native applications
+npm install @ppyuesheng/loki-sdk-h5-adapter-vue    # Vue applications
+npm install @ppyuesheng/loki-sdk-h5-adapter-js     # Plain JS applications
+npm install @ppyuesheng/loki-sdk-h5-adapter-rn     # React Native applications
 ```
 
 ### Basic Usage
 
 ```typescript
-import { sdkH5, installAutoCapture } from '@ppyuesheng/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
 
 // Initialize SDK
 sdkH5.init({
@@ -65,9 +65,9 @@ sdkH5.log("info", "page_loaded", { path: location.pathname }, "Page Loaded");
 ```typescript
 import { createApp } from "vue";
 import App from "./App.vue";
-import { sdkH5 } from "@ppyuesheng/sdk-h5-core";
-import { installAutoCapture } from "@ppyuesheng/sdk-h5-core";
-import { createSdkVuePlugin } from "@ppyuesheng/sdk-h5-adapter-vue";
+import { sdkH5 } from "@ppyuesheng/loki-sdk-h5-core";
+import { installAutoCapture } from "@ppyuesheng/loki-sdk-h5-core";
+import { createSdkVuePlugin } from "@ppyuesheng/loki-sdk-h5-adapter-vue";
 
 sdkH5.init({ 
   appName: "demo-vue", 
@@ -83,8 +83,8 @@ app.mount("#app");
 ### React Native
 
 ```typescript
-import { sdkH5 } from '@ppyuesheng/sdk-h5-core';
-import { installRnGlobalHandlers } from '@ppyuesheng/sdk-h5-adapter-rn';
+import { sdkH5 } from '@ppyuesheng/loki-sdk-h5-core';
+import { installRnGlobalHandlers } from '@ppyuesheng/loki-sdk-h5-adapter-rn';
 
 sdkH5.init({
   appName: 'my-rn-app',
@@ -147,11 +147,11 @@ sdkH5.setContext({
 
 | Package | Function | Size |
 |---------|----------|------|
-| `@ppyuesheng/sdk-h5-core` | Core SDK functionality | ~10KB |
-| `@ppyuesheng/sdk-h5-transport-loki` | Loki transport layer | ~3KB |
-| `@ppyuesheng/sdk-h5-adapter-js` | Native JS adapter | ~1KB |
-| `@ppyuesheng/sdk-h5-adapter-vue` | Vue.js adapter | ~1KB |
-| `@ppyuesheng/sdk-h5-adapter-rn` | React Native adapter | ~1KB |
+| `@ppyuesheng/loki-sdk-h5-core` | Core SDK functionality | ~10KB |
+| `@ppyuesheng/loki-sdk-h5-transport-loki` | Loki transport layer | ~3KB |
+| `@ppyuesheng/loki-sdk-h5-adapter-js` | Native JS adapter | ~1KB |
+| `@ppyuesheng/loki-sdk-h5-adapter-vue` | Vue.js adapter | ~1KB |
+| `@ppyuesheng/loki-sdk-h5-adapter-rn` | React Native adapter | ~1KB |
 
 ## 🔧 Configuration Options
 
@@ -258,7 +258,7 @@ Install automatic error capture for:
 - Resource load errors
 
 ```typescript
-import { installAutoCapture } from '@ppyuesheng/sdk-h5-core';
+import { installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
 installAutoCapture(sdkH5);
 ```
 
@@ -274,7 +274,7 @@ If you encounter CORS errors when connecting to Loki, see [CORS-SOLUTIONS.md](./
 ### Quick Fix - Proxy Mode
 
 ```typescript
-import { sdkH5, installAutoCapture } from "@ppyuesheng/sdk-h5-core";
+import { sdkH5, installAutoCapture } from "@ppyuesheng/loki-sdk-h5-core";
 
 sdkH5.init({
   appName: "demo-h5",

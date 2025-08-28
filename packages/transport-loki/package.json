@@ -1,5 +1,8 @@
 {
-  "name": "@ppyuesheng/sdk-h5-transport-loki",
+  "name": "@ppyuesheng/loki-sdk-h5-transport-loki",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "0.1.1",
   "description": "H5 SDK Loki传输层 - 提供日志数据到Loki的传输功能",
   "type": "module",

@@ -1,5 +1,8 @@
 {
-  "name": "@ppyuesheng/sdk-h5-adapter-vue",
+  "name": "@ppyuesheng/loki-sdk-h5-adapter-vue",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "0.1.1",
   "description": "H5 SDK Vue适配器 - 为Vue应用提供日志收集集成",
   "type": "module",

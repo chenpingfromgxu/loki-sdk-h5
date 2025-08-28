@@ -1,4 +1,4 @@
-import { sdkH5, installAutoCapture } from '@ppyuesheng/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
 
 // 代理模式配置 - 解决CORS问题
 // 需要配合Nginx或后端代理使用

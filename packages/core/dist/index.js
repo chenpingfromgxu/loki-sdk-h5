@@ -184,7 +184,7 @@ function drainBatch(queue, cfg) {
   }
   return batch;
 }
-var STORAGE_KEY = "sdk-h5-offline-buffer";
+var STORAGE_KEY = "loki-sdk-h5-offline-buffer";
 var MAX_OFFLINE_RECORDS = 50;
 function persistToStorage(queue) {
   if (typeof localStorage === "undefined")
@@ -232,7 +232,7 @@ async function retry(fn, maxRetries, baseBackoffMs) {
 }
 
 // src/sdk.ts
-import { LokiTransport } from "@ppyuesheng/sdk-h5-transport-loki";
+import { LokiTransport } from "@ppyuesheng/loki-sdk-h5-transport-loki";
 var SdkH5Impl = class {
   constructor() {
     this.queue = [];
