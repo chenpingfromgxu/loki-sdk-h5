@@ -52,9 +52,7 @@ jobs:
           if [ -d "$pkg/dist" ]; then
             echo "Publishing $(basename $pkg)..."
             cd $pkg
-            npm publish --access public || echo "Package already exists or failed to publish"
+            npm publish --access public --registry https://npm.pkg.github.com || echo "Package already exists or failed to publish"
             cd ../..
           fi
         done
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
