@@ -3,4 +3,4 @@ interface SdkH5 {
 }
 declare function installRnGlobalHandlers(sdk: SdkH5): void;
 
-export { type SdkH5, installRnGlobalHandlers };
+export { SdkH5, installRnGlobalHandlers };

@@ -4,4 +4,4 @@ interface SdkH5 {
 }
 declare function installAutoCapture(sdk: SdkH5): void;
 
-export { type SdkH5, installAutoCapture };
+export { SdkH5, installAutoCapture };

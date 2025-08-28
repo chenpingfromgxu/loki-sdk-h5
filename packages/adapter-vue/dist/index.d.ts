@@ -7,4 +7,4 @@ declare function createSdkVuePlugin(sdk: SdkH5): {
     install(app: App): void;
 };
 
-export { type SdkH5, createSdkVuePlugin };
+export { SdkH5, createSdkVuePlugin };

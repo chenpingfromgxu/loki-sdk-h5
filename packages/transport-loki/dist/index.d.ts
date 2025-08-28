@@ -79,4 +79,4 @@ declare class LokiTransport {
     private ensurePushUrl;
 }
 
-export { type LogEnvelope, LokiTransport, type SdkH5Config, LokiTransport as default };
+export { LogEnvelope, LokiTransport, SdkH5Config, LokiTransport as default };

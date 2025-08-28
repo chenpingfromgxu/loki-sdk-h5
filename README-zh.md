@@ -31,18 +31,18 @@
 
 ```bash
 # 安装核心包
-npm install @ppyuesheng-org/sdk-h5-core
+npm install @ppyuesheng/loki-sdk-h5-core
 
 # 按需安装适配器
-npm install @ppyuesheng-org/sdk-h5-adapter-vue    # Vue应用
-npm install @ppyuesheng-org/sdk-h5-adapter-js     # 普通JS应用
-npm install @ppyuesheng-org/sdk-h5-adapter-rn     # React Native应用
+npm install @ppyuesheng/loki-sdk-h5-adapter-vue    # Vue应用
+npm install @ppyuesheng/loki-sdk-h5-adapter-js     # 普通JS应用
+npm install @ppyuesheng/loki-sdk-h5-adapter-rn     # React Native应用
 ```
 
 ### 基础使用
 
 ```typescript
-import { sdkH5, installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
+import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
 
 // 初始化SDK
 sdkH5.init({
@@ -65,9 +65,9 @@ sdkH5.log("info", "page_loaded", { path: location.pathname }, "页面加载");
 ```typescript
 import { createApp } from "vue";
 import App from "./App.vue";
-import { sdkH5 } from "@ppyuesheng-org/sdk-h5-core";
-import { installAutoCapture } from "@ppyuesheng-org/sdk-h5-core";
-import { createSdkVuePlugin } from "@ppyuesheng-org/sdk-h5-adapter-vue";
+import { sdkH5 } from "@ppyuesheng/loki-sdk-h5-core";
+import { installAutoCapture } from "@ppyuesheng/loki-sdk-h5-core";
+import { createSdkVuePlugin } from "@ppyuesheng/loki-sdk-h5-adapter-vue";
 
 sdkH5.init({ 
   appName: "demo-vue", 
@@ -83,8 +83,8 @@ app.mount("#app");
 ### React Native
 
 ```typescript
-import { sdkH5 } from '@ppyuesheng-org/sdk-h5-core';
-import { installRnGlobalHandlers } from '@ppyuesheng-org/sdk-h5-adapter-rn';
+import { sdkH5 } from '@ppyuesheng/loki-sdk-h5-core';
+import { installRnGlobalHandlers } from '@ppyuesheng/loki-sdk-h5-adapter-rn';
 
 sdkH5.init({
   appName: 'my-rn-app',
@@ -147,11 +147,11 @@ sdkH5.setContext({
 
 | 包名 | 功能 | 大小 |
 |------|------|------|
-| `@ppyuesheng-org/sdk-h5-core` | 核心SDK功能 | ~10KB |
-| `@ppyuesheng-org/sdk-h5-transport-loki` | Loki传输层 | ~3KB |
-| `@ppyuesheng-org/sdk-h5-adapter-js` | 原生JS适配器 | ~1KB |
-| `@ppyuesheng-org/sdk-h5-adapter-vue` | Vue.js适配器 | ~1KB |
-| `@ppyuesheng-org/sdk-h5-adapter-rn` | React Native适配器 | ~1KB |
+| `@ppyuesheng/loki-sdk-h5-core` | 核心SDK功能 | ~10KB |
+| `@ppyuesheng/loki-sdk-h5-transport-loki` | Loki传输层 | ~3KB |
+| `@ppyuesheng/loki-sdk-h5-adapter-js` | 原生JS适配器 | ~1KB |
+| `@ppyuesheng/loki-sdk-h5-adapter-vue` | Vue.js适配器 | ~1KB |
+| `@ppyuesheng/loki-sdk-h5-adapter-rn` | React Native适配器 | ~1KB |
 
 ## 🔧 配置选项
 
@@ -258,7 +258,7 @@ await sdkH5.shutdown();
 - 资源加载错误
 
 ```typescript
-import { installAutoCapture } from '@ppyuesheng-org/sdk-h5-core';
+import { installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
 installAutoCapture(sdkH5);
 ```
 
@@ -274,7 +274,7 @@ installAutoCapture(sdkH5);
 ### 快速解决 - 代理模式
 
 ```typescript
-import { sdkH5, installAutoCapture } from "@ppyuesheng-org/sdk-h5-core";
+import { sdkH5, installAutoCapture } from "@ppyuesheng/loki-sdk-h5-core";
 
 sdkH5.init({
   appName: "demo-h5",

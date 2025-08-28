@@ -1,5 +1,5 @@
 {
-  "name": "sdk-h5-demo-h5",
+  "name": "loki-sdk-h5-demo-h5",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,10 +9,10 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
-    "@ppyuesheng-org/sdk-h5-core": "latest"
+    "@ppyuesheng/loki-sdk-h5-core": "^0.1.1"
   },
   "devDependencies": {
-    "vite": "^5.4.8",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vite": "^5.4.8"
   }
 }

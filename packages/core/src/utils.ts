@@ -1,4 +1,4 @@
-import type { LogEnvelope, SdkH5Config } from '@ppyuesheng-org/sdk-h5-transport-loki';
+import type { LogEnvelope, SdkH5Config } from '@ppyuesheng/loki-sdk-h5-transport-loki';
 import type { GlobalContext } from './types.js';
 
 export class RateLimiter {
@@ -249,7 +249,7 @@ export function drainBatch(queue: LogEnvelope[], cfg: Required<SdkH5Config>): Lo
   return batch;
 }
 
-const STORAGE_KEY = 'sdk-h5-offline-buffer';
+const STORAGE_KEY = 'loki-sdk-h5-offline-buffer';
 const MAX_OFFLINE_RECORDS = 50;
 
 export function persistToStorage(queue: LogEnvelope[]): void {
