@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loki SDK 自动检测测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .error {
+            background: #ffe8e8;
+            color: #d32f2f;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Loki SDK 自动检测功能测试</h1>
+    
+    <div class="info">
+        <h3>📋 测试说明</h3>
+        <p>这个页面用于测试SDK的自动CORS代理URL检测功能。你可以通过修改URL来模拟不同的环境。</p>
+        <p><strong>当前URL:</strong> <span id="current-url"></span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 环境检测结果</h3>
+        <div id="env-detection"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🌐 代理URL检测</h3>
+        <div id="proxy-detection"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 测试用例</h3>
+        <p>点击下面的按钮来模拟不同的环境：</p>
+        <button onclick="simulateEnvironment('localhost:3000')">localhost:3000 (开发)</button>
+        <button onclick="simulateEnvironment('localhost:5173')">localhost:5173 (Vite开发)</button>
+        <button onclick="simulateEnvironment('dev.example.com')">dev.example.com (开发域名)</button>
+        <button onclick="simulateEnvironment('example.com')">example.com (生产)</button>
+        <button onclick="simulateEnvironment('app.example.com')">app.example.com (生产子域名)</button>
+    </div>
+
+    <script>
+        // 模拟SDK的自动检测逻辑
+        function isDevelopmentEnvironment(hostname, port) {
+            const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+            const devPorts = ['3000', '3001', '5173', '5174', '8080', '8081', '4200', '4201'];
+            const isDevPort = devPorts.includes(port);
+            const isDevDomain = hostname.includes('.local') || 
+                               hostname.includes('.dev') || 
+                               hostname.includes('.test') ||
+                               hostname.includes('dev.') ||
+                               hostname.includes('staging.');
+            
+            return isLocalhost || isDevPort || isDevDomain;
+        }
+
+        function buildProductionProxyUrl(protocol, hostname) {
+            const parts = hostname.split('.');
+            if (parts.length >= 2) {
+                const domain = parts.slice(-2).join('.');
+                return `${protocol}//cors-proxy.${domain}`;
+            } else {
+                return `${protocol}//cors-proxy.${hostname}`;
+            }
+        }
+
+        function detectCorsProxyUrl() {
+            const { protocol, hostname, port } = window.location;
+            const isDev = isDevelopmentEnvironment(hostname, port);
+            
+            if (isDev) {
+                return `${protocol}//localhost:3000`;
+            } else {
+                return buildProductionProxyUrl(protocol, hostname);
+            }
+        }
+
+        function updateDisplay() {
+            const { protocol, hostname, port } = window.location;
+            const isDev = isDevelopmentEnvironment(hostname, port);
+            const proxyUrl = detectCorsProxyUrl();
+
+            // 显示当前URL
+            document.getElementById('current-url').textContent = window.location.href;
+
+            // 显示环境检测结果
+            const envDetection = document.getElementById('env-detection');
+            envDetection.innerHTML = `
+                <div class="result">
+                    <strong>主机名:</strong> ${hostname}<br>
+                    <strong>端口:</strong> ${port || '80/443'}<br>
+                    <strong>协议:</strong> ${protocol}<br>
+                    <strong>环境类型:</strong> ${isDev ? '开发环境' : '生产环境'}
+                </div>
+            `;
+
+            // 显示代理URL检测结果
+            const proxyDetection = document.getElementById('proxy-detection');
+            proxyDetection.innerHTML = `
+                <div class="result">
+                    <strong>检测到的代理URL:</strong> ${proxyUrl}<br>
+                    <strong>完整端点:</strong> ${proxyUrl}/proxy?target=YOUR_LOKI_URL
+                </div>
+            `;
+        }
+
+        function simulateEnvironment(url) {
+            // 注意：这只是一个演示，实际不会改变当前页面的URL
+            const newUrl = new URL(url, window.location.origin);
+            const { protocol, hostname, port } = newUrl;
+            
+            const isDev = isDevelopmentEnvironment(hostname, port);
+            const proxyUrl = isDev ? 
+                `${protocol}//localhost:3000` : 
+                buildProductionProxyUrl(protocol, hostname);
+
+            const result = `
+                <div class="result">
+                    <strong>模拟URL:</strong> ${url}<br>
+                    <strong>环境类型:</strong> ${isDev ? '开发环境' : '生产环境'}<br>
+                    <strong>代理URL:</strong> ${proxyUrl}<br>
+                    <strong>完整端点:</strong> ${proxyUrl}/proxy?target=YOUR_LOKI_URL
+                </div>
+            `;
+
+            document.getElementById('proxy-detection').innerHTML = result;
+        }
+
+        // 页面加载时更新显示
+        updateDisplay();
+
+        // 监听URL变化（如果支持）
+        if (window.history && window.history.pushState) {
+            window.addEventListener('popstate', updateDisplay);
+        }
+    </script>
+</body>
+</html>

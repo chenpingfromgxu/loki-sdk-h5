@@ -1,0 +1,33 @@
+{
+  "name": "loki-cors-proxy",
+  "version": "1.0.0",
+  "description": "CORS代理服务 - 解决Loki SDK的跨域问题",
+  "main": "cors-proxy-server.js",
+  "scripts": {
+    "start": "node cors-proxy-server.js",
+    "dev": "nodemon cors-proxy-server.js",
+    "deploy:vercel": "vercel --prod",
+    "deploy:netlify": "netlify deploy --prod"
+  },
+  "keywords": [
+    "cors",
+    "proxy",
+    "loki",
+    "sdk",
+    "monitoring"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "http-proxy-middleware": "^2.0.6",
+    "express-rate-limit": "^6.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

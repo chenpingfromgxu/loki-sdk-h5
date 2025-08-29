@@ -56,6 +56,9 @@ type SdkH5Config = {
     corsMode?: "cors" | "no-cors" | "same-origin";
     useProxy?: boolean;
     proxyPath?: string;
+    transportMode?: "direct" | "proxy" | "cors-proxy";
+    corsProxyUrl?: string;
+    autoDetectCorsProxy?: boolean;
     redact?: {
         urlQuery?: boolean;
         headers?: string[];
@@ -76,7 +79,26 @@ declare class LokiTransport {
         }[];
     };
     getEndpoint(): string;
+    /**
+     * 获取CORS代理服务URL
+     * 支持自动检测和手动配置
+     */
+    private getCorsProxyUrl;
+    /**
+     * 自动检测CORS代理服务URL
+     * 开发环境：使用localhost:3000
+     * 生产环境：使用当前域名下的代理服务
+     */
+    private detectCorsProxyUrl;
+    /**
+     * 检测是否为开发环境
+     */
+    private isDevelopmentEnvironment;
+    /**
+     * 构建生产环境的代理URL
+     */
+    private buildProductionProxyUrl;
     private ensurePushUrl;
 }
 
-export { LogEnvelope, LokiTransport, SdkH5Config, LokiTransport as default };
+export { type LogEnvelope, LokiTransport, type SdkH5Config, LokiTransport as default };

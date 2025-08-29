@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "name": "loki-cors-proxy",
+  "builds": [
+    {
+      "src": "cors-proxy-server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/health",
+      "dest": "/cors-proxy-server.js"
+    },
+    {
+      "src": "/proxy/(.*)",
+      "dest": "/cors-proxy-server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/cors-proxy-server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "cors-proxy-server.js": {
+      "maxDuration": 30
+    }
+  }
+}

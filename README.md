@@ -41,24 +41,61 @@ npm install @ppyuesheng/loki-sdk-h5-adapter-rn     # React Native applications
 
 ### Basic Usage
 
+#### 方式1: 直接模式（需要Loki服务器支持CORS）
 ```typescript
 import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
 
-// Initialize SDK
 sdkH5.init({
   appName: "demo-h5",
   environment: "staging",
-  endpoints: { loki: "https://loki.example.com/loki/api/v1/push" },
+  endpoints: { loki: "https://loki.example.com" },
+  transportMode: "direct",
+  corsMode: "cors",
   useSendBeacon: true,
   enableOfflineBuffer: true,
 });
 
-// Enable automatic error capture
 installAutoCapture(sdkH5);
-
-// Manual logging
-sdkH5.log("info", "page_loaded", { path: location.pathname }, "Page Loaded");
 ```
+
+#### 方式2: CORS代理服务（推荐 - 自动检测）
+```typescript
+import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
+
+sdkH5.init({
+  appName: "demo-h5",
+  environment: "staging",
+  endpoints: { loki: "https://loki.example.com" },
+  transportMode: "cors-proxy",
+  // corsProxyUrl: "https://your-cors-proxy-domain.com", // 可选：手动指定
+  // autoDetectCorsProxy: true, // 默认true，可省略
+  corsMode: "cors",
+  useSendBeacon: true,
+  enableOfflineBuffer: true,
+});
+
+installAutoCapture(sdkH5);
+```
+
+#### 方式3: 本地代理模式（需要配置Nginx）
+```typescript
+import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
+
+sdkH5.init({
+  appName: "demo-h5",
+  environment: "staging",
+  endpoints: { loki: "https://loki.example.com" },
+  transportMode: "proxy",
+  proxyPath: "/api/loki",
+  corsMode: "same-origin",
+  useSendBeacon: true,
+  enableOfflineBuffer: true,
+});
+
+installAutoCapture(sdkH5);
+```
+
+> 📖 **详细部署指南**: 查看 [DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md) 了解各种部署方案的详细说明和配置方法。
 
 ### Vue 3 Integration
 
