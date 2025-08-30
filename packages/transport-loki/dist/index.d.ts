@@ -56,9 +56,12 @@ type SdkH5Config = {
     corsMode?: "cors" | "no-cors" | "same-origin";
     useProxy?: boolean;
     proxyPath?: string;
-    transportMode?: "direct" | "proxy" | "cors-proxy";
+    transportMode?: "direct" | "proxy" | "cors-proxy" | "beacon-only" | "auto";
     corsProxyUrl?: string;
     autoDetectCorsProxy?: boolean;
+    corsStrategy?: "auto" | "beacon" | "proxy" | "direct" | "fallback";
+    enableBeaconFallback?: boolean;
+    enableOfflineQueue?: boolean;
     redact?: {
         urlQuery?: boolean;
         headers?: string[];
@@ -72,32 +75,48 @@ declare class LokiTransport {
     private labelsFor;
     private toLogLine;
     send(records: LogEnvelope[]): Promise<void>;
+    /**
+     * 自动策略：智能选择最佳发送方式
+     */
+    private sendWithAutoStrategy;
+    /**
+     * 使用fetch发送（直接模式）
+     */
+    private sendWithFetch;
+    /**
+     * 使用sendBeacon发送
+     */
+    private sendWithBeacon;
+    /**
+     * 使用代理发送
+     */
+    private sendWithProxy;
+    /**
+     * 降级策略：依次尝试不同方式
+     */
+    private sendWithFallback;
+    /**
+     * 将数据加入离线队列
+     */
+    private queueForLater;
+    /**
+     * 获取直接端点URL
+     */
+    private getDirectEndpoint;
+    /**
+     * 获取代理端点URL
+     */
+    private getProxyEndpoint;
     createPayload(records: LogEnvelope[]): {
         streams: {
             stream: Record<string, string>;
             values: [string, string][];
         }[];
     };
+    /**
+     * 兼容旧的getEndpoint方法
+     */
     getEndpoint(): string;
-    /**
-     * 获取CORS代理服务URL
-     * 支持自动检测和手动配置
-     */
-    private getCorsProxyUrl;
-    /**
-     * 自动检测CORS代理服务URL
-     * 开发环境：使用localhost:3000
-     * 生产环境：使用当前域名下的代理服务
-     */
-    private detectCorsProxyUrl;
-    /**
-     * 检测是否为开发环境
-     */
-    private isDevelopmentEnvironment;
-    /**
-     * 构建生产环境的代理URL
-     */
-    private buildProductionProxyUrl;
     private ensurePushUrl;
 }
 

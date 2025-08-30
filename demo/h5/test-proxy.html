@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDK 代理测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SDK 代理测试</h1>
+        <p>这个页面用于测试 SDK 的代理模式是否正常工作。</p>
+        
+        <h2>测试按钮</h2>
+        <button onclick="testDirectMode()">测试直接模式</button>
+        <button onclick="testProxyMode()">测试代理模式</button>
+        <button onclick="testCorsProxyMode()">测试CORS代理模式</button>
+        <button onclick="clearLog()">清空日志</button>
+        
+        <h2>日志输出</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script type="module">
+        import { sdkH5 } from '@ppyuesheng/loki-sdk-h5-core';
+
+        let currentMode = 'none';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logDiv.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function testDirectMode() {
+            log('开始测试直接模式...');
+            currentMode = 'direct';
+            
+            try {
+                sdkH5.init({
+                    appName: 'proxy-test',
+                    environment: 'dev',
+                    endpoints: { 
+                        loki: 'http://47.77.196.223:3100'
+                    },
+                    transportMode: 'direct',
+                    corsMode: 'cors',
+                    onError: (err) => {
+                        log(`直接模式错误: ${err.message}`, 'error');
+                    }
+                });
+                
+                log('直接模式初始化成功', 'success');
+                sdkH5.log('info', '直接模式测试日志');
+                log('已发送测试日志');
+            } catch (err) {
+                log(`直接模式初始化失败: ${err.message}`, 'error');
+            }
+        }
+
+        function testProxyMode() {
+            log('开始测试代理模式...');
+            currentMode = 'proxy';
+            
+            try {
+                sdkH5.init({
+                    appName: 'proxy-test',
+                    environment: 'dev',
+                    endpoints: { 
+                        loki: 'http://47.77.196.223:3100'
+                    },
+                    transportMode: 'proxy',
+                    proxyPath: '/api/loki',
+                    corsMode: 'same-origin',
+                    onError: (err) => {
+                        log(`代理模式错误: ${err.message}`, 'error');
+                    }
+                });
+                
+                log('代理模式初始化成功', 'success');
+                sdkH5.log('info', '代理模式测试日志');
+                log('已发送测试日志');
+            } catch (err) {
+                log(`代理模式初始化失败: ${err.message}`, 'error');
+            }
+        }
+
+        function testCorsProxyMode() {
+            log('开始测试CORS代理模式...');
+            currentMode = 'cors-proxy';
+            
+            try {
+                sdkH5.init({
+                    appName: 'proxy-test',
+                    environment: 'dev',
+                    endpoints: { 
+                        loki: 'http://47.77.196.223:3100'
+                    },
+                    transportMode: 'cors-proxy',
+                    corsProxyUrl: 'https://cors-anywhere.herokuapp.com/',
+                    autoDetectCorsProxy: false,
+                    corsMode: 'cors',
+                    onError: (err) => {
+                        log(`CORS代理模式错误: ${err.message}`, 'error');
+                    }
+                });
+                
+                log('CORS代理模式初始化成功', 'success');
+                sdkH5.log('info', 'CORS代理模式测试日志');
+                log('已发送测试日志');
+            } catch (err) {
+                log(`CORS代理模式初始化失败: ${err.message}`, 'error');
+            }
+        }
+
+        // 暴露到全局
+        window.testDirectMode = testDirectMode;
+        window.testProxyMode = testProxyMode;
+        window.testCorsProxyMode = testCorsProxyMode;
+        window.clearLog = clearLog;
+    </script>
+</body>
+</html>

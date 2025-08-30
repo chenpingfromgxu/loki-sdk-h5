@@ -50,6 +50,14 @@ export function withDefaults(cfg: SdkH5Config): Required<SdkH5Config> {
     corsMode: cfg.corsMode || 'cors',
     useProxy: cfg.useProxy || false,
     proxyPath: cfg.proxyPath || '/api/loki',
+    // 传输模式配置
+    transportMode: cfg.transportMode || 'auto',
+    corsProxyUrl: cfg.corsProxyUrl || '',
+    autoDetectCorsProxy: cfg.autoDetectCorsProxy ?? true,
+    // 新增：智能CORS处理选项
+    corsStrategy: cfg.corsStrategy || 'auto',
+    enableBeaconFallback: cfg.enableBeaconFallback ?? true,
+    enableOfflineQueue: cfg.enableOfflineQueue ?? true,
     redact: cfg.redact || {},
     onError: cfg.onError || (() => {}),
   };

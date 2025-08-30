@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "H5 SDK核心包 - 提供日志收集和上报功能",
   "type": "module",
   "main": "./dist/index.js",
@@ -39,7 +39,7 @@
     "dev": "tsup --watch"
   },
   "dependencies": {
-    "@ppyuesheng/loki-sdk-h5-transport-loki": "^0.1.2"
+    "@ppyuesheng/loki-sdk-h5-transport-loki": "^1.0.0"
   },
   "devDependencies": {
     "tsup": "^7.2.0",

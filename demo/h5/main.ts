@@ -31,17 +31,17 @@ import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
 //   }
 // });
 
-// 方式3: CORS代理服务模式（推荐 - 自动检测代理URL）
+// 方式2: 智能CORS策略（推荐 - 自动处理CORS问题）
 sdkH5.init({
   appName: 'demo-h5',
   environment: 'dev',
   endpoints: { 
     loki: 'http://47.77.196.223:3100'
   },
-  transportMode: 'cors-proxy',
-  // corsProxyUrl: 'https://your-cors-proxy-domain.com', // 可选：手动指定代理URL
-  autoDetectCorsProxy: true, // 自动检测代理URL（默认true）
-  corsMode: 'cors',
+  // 使用智能CORS策略，自动选择最佳发送方式
+  corsStrategy: 'auto',
+  enableBeaconFallback: true,
+  enableOfflineQueue: true,
   onError: (err) => {
     console.error('SDK Error:', err);
   }

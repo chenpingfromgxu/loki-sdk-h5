@@ -155,6 +155,77 @@ sdkH5.setContext({
 
 ## 🔧 配置选项
 
+### 解决 CORS 问题
+
+如果遇到 CORS 错误（如 `405 Method Not Allowed` 或 `Request mode is "same-origin" but the URL's origin is not same`），这是因为浏览器在发送实际的 POST 请求之前，先发送了一个 OPTIONS 预检请求，但 Loki 服务器不支持 OPTIONS 方法。
+
+#### 推荐解决方案
+
+**开发环境**：使用 Vite 开发代理
+
+```javascript
+// vite.config.js
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api/loki': {
+        target: 'http://your-loki-server:3100',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/loki/, ''),
+      },
+    },
+  },
+});
+```
+
+然后使用代理模式：
+
+```javascript
+sdkH5.init({
+  appName: 'my-app',
+  environment: 'dev',
+  endpoints: { 
+    loki: 'http://your-loki-server:3100'
+  },
+  transportMode: 'proxy',
+  proxyPath: '/api/loki',
+  corsMode: 'same-origin'
+});
+```
+
+**生产环境**：配置 Nginx 反向代理
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location /api/loki/ {
+        # 处理 OPTIONS 预检请求
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+
+        # 代理到 Loki
+        proxy_pass http://your-loki-server:3100/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        # 添加 CORS 头
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+    }
+}
+```
+
 ### 核心配置
 ```typescript
 interface SdkH5Config {
@@ -356,10 +427,44 @@ location /api/loki/ {
 
 ## Demo
 
-查看 [demo](./demo/h5/) 获取完整的工作示例，包括：
-- 错误触发按钮
-- 实时日志查看
-- 配置示例
+项目包含两个演示环境：
+
+### 🚀 开发环境 (`demo/dev/`)
+
+用于 SDK 开发和调试，直接引用 SDK 源码：
+
+```bash
+cd demo/dev
+pnpm install
+pnpm dev
+```
+
+**特点：**
+- 直接引用 SDK 源码，无需构建和发布
+- 实时修改源码并立即看到效果
+- 完整的源码调试能力
+- 支持热重载
+
+### 📦 生产环境 (`demo/h5/`)
+
+用于测试发布的 SDK 包：
+
+```bash
+cd demo/h5
+pnpm install
+pnpm dev
+```
+
+**特点：**
+- 引用发布的 npm 包
+- 验证发布包的功能
+- 模拟真实使用场景
+
+### 使用建议
+
+- **开发阶段**：使用 `demo/dev/` 进行功能开发和调试
+- **测试阶段**：使用 `demo/h5/` 验证发布包的功能
+- **问题排查**：在开发环境中复现和修复问题
 
 ## 🛠️ 故障排除
 

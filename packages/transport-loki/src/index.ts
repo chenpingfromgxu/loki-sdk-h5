@@ -39,10 +39,14 @@ export type SdkH5Config = {
   corsMode?: "cors" | "no-cors" | "same-origin"; // default "cors"
   useProxy?: boolean;          // default false, if true, use relative URL
   proxyPath?: string;          // default "/api/loki", proxy path prefix
-  // 新增：传输模式选择
-  transportMode?: "direct" | "proxy" | "cors-proxy"; // default "direct"
-  corsProxyUrl?: string;       // CORS代理服务URL，如 "https://cors-proxy.yourdomain.com"
+  // 传输模式选择
+  transportMode?: "direct" | "proxy" | "cors-proxy" | "beacon-only" | "auto"; // default "auto"
+  corsProxyUrl?: string;       // CORS代理服务URL
   autoDetectCorsProxy?: boolean; // 自动检测CORS代理URL，默认true
+  // 新增：智能CORS处理选项
+  corsStrategy?: "auto" | "beacon" | "proxy" | "direct" | "fallback"; // default "auto"
+  enableBeaconFallback?: boolean; // 启用beacon降级，默认true
+  enableOfflineQueue?: boolean; // 启用离线队列，默认true
   redact?: {
     urlQuery?: boolean;        // default true
     headers?: string[];        // e.g., ["authorization", "cookie"]
@@ -59,7 +63,7 @@ export class LokiTransport {
     const env = record.context.app?.env || this.cfg.environment || '';
     const release = record.context.app?.release || this.cfg.release || '';
     const platform = record.context.device?.platform || 'web';
-    return { app, env, release, platform, sdk: 'sdk-h5@0.1.0' };
+    return { app, env, release, platform, sdk: 'sdk-h5@1.0.0' };
   }
 
   private toLogLine(record: LogEnvelope): [string, string] {
@@ -81,25 +85,198 @@ export class LokiTransport {
     if (!records.length) return;
     
     const payload = this.createPayload(records);
-    const endpoint = this.getEndpoint();
+    const strategy = this.cfg.corsStrategy || 'auto';
+    
+    // 根据策略选择发送方式
+    switch (strategy) {
+      case 'beacon':
+        await this.sendWithBeacon(payload);
+        break;
+      case 'proxy':
+        await this.sendWithProxy(payload);
+        break;
+      case 'direct':
+        await this.sendWithFetch(payload);
+        break;
+      case 'fallback':
+        await this.sendWithFallback(payload);
+        break;
+      case 'auto':
+      default:
+        await this.sendWithAutoStrategy(payload);
+        break;
+    }
+  }
 
+  /**
+   * 自动策略：智能选择最佳发送方式
+   */
+  private async sendWithAutoStrategy(payload: any): Promise<void> {
+    const endpoint = this.cfg.endpoints.loki;
+    
+    // 1. 首先尝试直接发送（如果Loki服务器支持CORS）
+    try {
+      await this.sendWithFetch(payload);
+      return;
+    } catch (error) {
+      console.debug('Direct fetch failed, trying beacon...', error);
+    }
+    
+    // 2. 如果直接发送失败，尝试使用beacon
+    if (this.cfg.enableBeaconFallback !== false) {
+      try {
+        await this.sendWithBeacon(payload);
+        return;
+      } catch (error) {
+        console.debug('Beacon failed, trying proxy...', error);
+      }
+    }
+    
+    // 3. 如果beacon也失败，尝试代理模式
+    try {
+      await this.sendWithProxy(payload);
+      return;
+    } catch (error) {
+      console.debug('Proxy failed, using offline queue...', error);
+    }
+    
+    // 4. 所有方式都失败，使用离线队列
+    if (this.cfg.enableOfflineQueue !== false) {
+      this.queueForLater(payload);
+    } else {
+      throw new Error('All sending strategies failed and offline queue is disabled');
+    }
+  }
+
+  /**
+   * 使用fetch发送（直接模式）
+   */
+  private async sendWithFetch(payload: any): Promise<void> {
+    const endpoint = this.getDirectEndpoint();
     const fetchOptions: RequestInit = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(this.cfg.headers || {}) },
+      headers: { 
+        'Content-Type': 'application/json', 
+        ...(this.cfg.headers || {}) 
+      },
       body: JSON.stringify(payload),
-      // keepalive allows sending during page unload in some browsers
       keepalive: true,
-      // CORS mode configuration
-      mode: this.cfg.corsMode || 'cors'
+      mode: 'cors' // 尝试CORS模式
     };
 
     const res = await fetch(endpoint, fetchOptions);
-
-    if (!('ok' in res ? res.ok : (res as any).status < 400)) {
-      const status = (res as any).status;
-      const statusText = (res as any).statusText || '';
-      throw new Error(`Loki push failed: ${status} ${statusText}`);
+    if (!res.ok) {
+      throw new Error(`Loki push failed: ${res.status} ${res.statusText}`);
     }
+  }
+
+  /**
+   * 使用sendBeacon发送
+   */
+  private async sendWithBeacon(payload: any): Promise<void> {
+    if (!navigator.sendBeacon) {
+      throw new Error('sendBeacon is not supported');
+    }
+
+    const endpoint = this.getDirectEndpoint();
+    const blob = new Blob([JSON.stringify(payload)], { 
+      type: 'application/json' 
+    });
+
+    const success = navigator.sendBeacon(endpoint, blob);
+    if (!success) {
+      throw new Error('sendBeacon failed');
+    }
+  }
+
+  /**
+   * 使用代理发送
+   */
+  private async sendWithProxy(payload: any): Promise<void> {
+    const endpoint = this.getProxyEndpoint();
+    const fetchOptions: RequestInit = {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+        ...(this.cfg.headers || {}) 
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+      mode: 'same-origin' // 代理模式使用same-origin
+    };
+
+    const res = await fetch(endpoint, fetchOptions);
+    if (!res.ok) {
+      throw new Error(`Proxy push failed: ${res.status} ${res.statusText}`);
+    }
+  }
+
+  /**
+   * 降级策略：依次尝试不同方式
+   */
+  private async sendWithFallback(payload: any): Promise<void> {
+    const strategies = [
+      () => this.sendWithFetch(payload),
+      () => this.sendWithBeacon(payload),
+      () => this.sendWithProxy(payload)
+    ];
+
+    for (const strategy of strategies) {
+      try {
+        await strategy();
+        return;
+      } catch (error) {
+        console.debug('Strategy failed, trying next...', error);
+      }
+    }
+
+    // 所有策略都失败
+    if (this.cfg.enableOfflineQueue !== false) {
+      this.queueForLater(payload);
+    } else {
+      throw new Error('All sending strategies failed');
+    }
+  }
+
+  /**
+   * 将数据加入离线队列
+   */
+  private queueForLater(payload: any): void {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const queue = JSON.parse(localStorage.getItem('loki-sdk-offline-queue') || '[]');
+        queue.push({
+          payload,
+          timestamp: Date.now(),
+          endpoint: this.cfg.endpoints.loki
+        });
+        
+        // 限制队列大小
+        if (queue.length > 100) {
+          queue.splice(0, queue.length - 100);
+        }
+        
+        localStorage.setItem('loki-sdk-offline-queue', JSON.stringify(queue));
+        console.debug('Data queued for later sending');
+      } catch (error) {
+        console.warn('Failed to queue data:', error);
+      }
+    }
+  }
+
+  /**
+   * 获取直接端点URL
+   */
+  private getDirectEndpoint(): string {
+    return this.ensurePushUrl(this.cfg.endpoints.loki);
+  }
+
+  /**
+   * 获取代理端点URL
+   */
+  private getProxyEndpoint(): string {
+    const proxyPath = this.cfg.proxyPath || '/api/loki';
+    return `${proxyPath}/loki/api/v1/push`;
   }
 
   createPayload(records: LogEnvelope[]) {
@@ -116,111 +293,22 @@ export class LokiTransport {
     };
   }
 
+  /**
+   * 兼容旧的getEndpoint方法
+   */
   getEndpoint(): string {
-    // 根据传输模式选择不同的端点
-    switch (this.cfg.transportMode || 'direct') {
+    const mode = this.cfg.transportMode || 'auto';
+    
+    switch (mode) {
       case 'proxy':
-        // 使用本地代理模式（需要用户配置Nginx等）
-        const proxyPath = this.cfg.proxyPath || '/api/loki';
-        return `${proxyPath}/loki/api/v1/push`;
-      
-      case 'cors-proxy':
-        // 使用CORS代理服务
-        const proxyUrl = this.getCorsProxyUrl();
-        const lokiUrl = this.ensurePushUrl(this.cfg.endpoints.loki);
-        return `${proxyUrl}/proxy?target=${encodeURIComponent(lokiUrl)}`;
-      
+        return this.getProxyEndpoint();
       case 'direct':
+        return this.getDirectEndpoint();
+      case 'beacon-only':
+        return this.getDirectEndpoint();
+      case 'auto':
       default:
-        // 直接模式（需要Loki服务器支持CORS）
-        return this.ensurePushUrl(this.cfg.endpoints.loki);
-    }
-  }
-
-  /**
-   * 获取CORS代理服务URL
-   * 支持自动检测和手动配置
-   */
-  private getCorsProxyUrl(): string {
-    // 如果手动配置了corsProxyUrl，优先使用
-    if (this.cfg.corsProxyUrl) {
-      return this.cfg.corsProxyUrl.replace(/\/$/, '');
-    }
-
-    // 如果禁用了自动检测，抛出错误
-    if (this.cfg.autoDetectCorsProxy === false) {
-      throw new Error('corsProxyUrl is required when autoDetectCorsProxy is disabled');
-    }
-
-    // 自动检测CORS代理URL
-    return this.detectCorsProxyUrl();
-  }
-
-  /**
-   * 自动检测CORS代理服务URL
-   * 开发环境：使用localhost:3000
-   * 生产环境：使用当前域名下的代理服务
-   */
-  private detectCorsProxyUrl(): string {
-    if (typeof window === 'undefined') {
-      throw new Error('Cannot detect CORS proxy URL in non-browser environment');
-    }
-
-    const { protocol, hostname, port } = window.location;
-    
-    // 检测是否为开发环境
-    const isDev = this.isDevelopmentEnvironment(hostname, port);
-    
-    if (isDev) {
-      // 开发环境：使用localhost:3000作为CORS代理
-      return `${protocol}//localhost:3000`;
-    } else {
-      // 生产环境：使用当前域名下的代理服务
-      return this.buildProductionProxyUrl(protocol, hostname);
-    }
-  }
-
-  /**
-   * 检测是否为开发环境
-   */
-  private isDevelopmentEnvironment(hostname: string, port: string): boolean {
-    // 本地开发环境
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-    
-    // 开发端口检测（Vite、Webpack等常用端口）
-    const devPorts = ['3000', '3001', '5173', '5174', '8080', '8081', '4200', '4201'];
-    const isDevPort = devPorts.includes(port);
-    
-    // 开发域名模式
-    const isDevDomain = hostname.includes('.local') || 
-                       hostname.includes('.dev') || 
-                       hostname.includes('.test') ||
-                       hostname.includes('dev.') ||
-                       hostname.includes('staging.');
-    
-    // 检查环境变量（如果可用）
-    const isDevEnv = typeof (globalThis as any).process !== 'undefined' && 
-                    (globalThis as any).process.env && 
-                    ((globalThis as any).process.env.NODE_ENV === 'development' || 
-                     (globalThis as any).process.env.NODE_ENV === 'dev');
-    
-    return isLocalhost || isDevPort || isDevDomain || isDevEnv;
-  }
-
-  /**
-   * 构建生产环境的代理URL
-   */
-  private buildProductionProxyUrl(protocol: string, hostname: string): string {
-    // 处理子域名情况
-    const parts = hostname.split('.');
-    
-    if (parts.length >= 2) {
-      // 标准域名：example.com -> cors-proxy.example.com
-      const domain = parts.slice(-2).join('.');
-      return `${protocol}//cors-proxy.${domain}`;
-    } else {
-      // 单级域名或其他情况：使用当前域名
-      return `${protocol}//cors-proxy.${hostname}`;
+        return this.getDirectEndpoint();
     }
   }
 

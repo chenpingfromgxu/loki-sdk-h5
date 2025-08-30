@@ -97,6 +97,56 @@ installAutoCapture(sdkH5);
 
 > 📖 **详细部署指南**: 查看 [DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md) 了解各种部署方案的详细说明和配置方法。
 
+### 🎯 智能 CORS 策略（推荐）
+
+**SDK 1.0.0+ 版本引入了智能 CORS 策略，自动处理所有 CORS 问题，无需手动配置代理！**
+
+```typescript
+import { sdkH5, installAutoCapture } from '@ppyuesheng/loki-sdk-h5-core';
+
+sdkH5.init({
+  appName: 'my-app',
+  environment: 'prod',
+  endpoints: { 
+    loki: 'http://your-loki-server:3100'
+  },
+  // 🚀 智能 CORS 策略 - 自动处理所有 CORS 问题
+  corsStrategy: 'auto',
+  enableBeaconFallback: true,
+  enableOfflineQueue: true,
+  onError: (err) => console.error('SDK Error:', err)
+});
+
+installAutoCapture(sdkH5);
+```
+
+**工作原理：**
+1. 首先尝试直接发送（如果 Loki 支持 CORS）
+2. 如果失败，使用 `navigator.sendBeacon`（绕过 CORS 限制）
+3. 如果 Beacon 也失败，尝试代理模式
+4. 最后使用离线队列存储数据
+
+**策略选项：**
+- `auto`：自动选择最佳方式（推荐）
+- `beacon`：仅使用 Beacon API
+- `proxy`：仅使用代理模式
+- `direct`：仅直接发送
+- `fallback`：依次尝试所有方式
+
+### 🔧 传统解决方案
+
+如果您的 Loki 服务器支持 CORS，可以直接使用：
+
+```typescript
+sdkH5.init({
+  appName: 'my-app',
+  endpoints: { loki: 'https://loki.example.com' },
+  corsStrategy: 'direct'
+});
+```
+
+如果需要配置代理，请参考 [CORS-SOLUTIONS.md](./CORS-SOLUTIONS.md) 获取详细配置说明。
+
 ### Vue 3 Integration
 
 ```typescript
@@ -393,10 +443,44 @@ Each log entry is sent as a JSON envelope to Loki:
 
 ## Demo
 
-See the [demo](./demo/h5/) for a complete working example with:
-- Error triggering buttons
-- Real-time log viewing
-- Configuration examples
+项目包含两个演示环境：
+
+### 🚀 开发环境 (`demo/dev/`)
+
+用于 SDK 开发和调试，直接引用 SDK 源码：
+
+```bash
+cd demo/dev
+pnpm install
+pnpm dev
+```
+
+**特点：**
+- 直接引用 SDK 源码，无需构建和发布
+- 实时修改源码并立即看到效果
+- 完整的源码调试能力
+- 支持热重载
+
+### 📦 生产环境 (`demo/h5/`)
+
+用于测试发布的 SDK 包：
+
+```bash
+cd demo/h5
+pnpm install
+pnpm dev
+```
+
+**特点：**
+- 引用发布的 npm 包
+- 验证发布包的功能
+- 模拟真实使用场景
+
+### 使用建议
+
+- **开发阶段**：使用 `demo/dev/` 进行功能开发和调试
+- **测试阶段**：使用 `demo/h5/` 验证发布包的功能
+- **问题排查**：在开发环境中复现和修复问题
 
 ## 🛠️ Troubleshooting
 

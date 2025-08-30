@@ -9,7 +9,7 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
-    "@ppyuesheng/loki-sdk-h5-core": "^0.1.1"
+    "@ppyuesheng/loki-sdk-h5-core": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

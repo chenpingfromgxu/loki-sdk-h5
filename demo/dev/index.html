@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDK 开发测试环境</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+        .warning {
+            color: #ffc107;
+        }
+        .info {
+            color: #17a2b8;
+        }
+        .test-section {
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.dev {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status.prod {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 SDK 开发测试环境</h1>
+        <p>直接引用 SDK 源码进行开发和测试，无需构建和发布</p>
+        <span class="status dev">开发模式</span>
+    </div>
+
+    <div class="container">
+        <h2>📋 测试说明</h2>
+        <p>这个环境直接引用 SDK 的源码文件，您可以：</p>
+        <ul>
+            <li>实时修改 SDK 源码并立即看到效果</li>
+            <li>调试 SDK 的内部逻辑</li>
+            <li>测试新功能而不需要构建和发布</li>
+            <li>使用浏览器开发者工具进行调试</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>🧪 功能测试</h2>
+        
+        <div class="test-section">
+            <h3>基础功能测试</h3>
+            <button onclick="testBasicInit()">测试基础初始化</button>
+            <button onclick="testLogging()">测试日志记录</button>
+            <button onclick="testErrorCapture()">测试错误捕获</button>
+            <button onclick="testContext()">测试上下文管理</button>
+        </div>
+
+        <div class="test-section">
+            <h3>传输模式测试</h3>
+            <button onclick="testDirectMode()">测试直接模式</button>
+            <button onclick="testProxyMode()">测试代理模式</button>
+            <button onclick="testBeaconMode()">测试Beacon模式</button>
+        </div>
+
+        <div class="test-section">
+            <h3>错误触发测试</h3>
+            <button onclick="triggerJsError()">触发 JS 错误</button>
+            <button onclick="triggerPromiseRejection()">触发 Promise 拒绝</button>
+            <button onclick="triggerResourceError()">触发资源加载错误</button>
+        </div>
+
+        <div class="test-section">
+            <h3>工具功能</h3>
+            <button onclick="clearLog()">清空日志</button>
+            <button onclick="exportLog()">导出日志</button>
+            <button onclick="testPerformance()">性能测试</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📊 实时日志</h2>
+        <div id="log" class="log">等待测试开始...</div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
